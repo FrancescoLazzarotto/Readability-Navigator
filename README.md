@@ -68,7 +68,7 @@ User → Profile (topic_vector, readability_target)
    Clean and tokenize texts, remove markup, and calculate readability scores.
 
 2. **Feature extraction**  
-   Compute text readability (e.g., Flesch, Gulpease) and semantic embeddings (SBERT).
+   Compute text readability (e.g., Flesch) and semantic embeddings (SBERT).
 
 3. **User modeling**  
    - Collect user interests and reading test.  
@@ -94,23 +94,9 @@ User → Profile (topic_vector, readability_target)
 6. **Evaluation**  
    Assess with metrics: NDCG@k, Target-Deviation@k, and Completion Rate.
 
----
 
-##  Evaluation Metrics
 
-| Metric | Purpose |
-|---------|----------|
-| **NDCG@k** | Measures ranking quality |
-| **Target-Deviation@k** | Measures how close recommendations match user level |
-| **Completion Rate** | Engagement & suitability |
-| **Calibration** | Balance between topic and difficulty |
-| **Novelty** | Diversity across sessions |
-
----
-
-Authors
+## Authors
 Francesco Lazzarotto
-Keywords
-recommender-system · machine-learning · AI · nlp ·
-education · accessibility · dyslexia · python · learning
+
 
