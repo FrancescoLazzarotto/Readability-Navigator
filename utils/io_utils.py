@@ -6,7 +6,7 @@ import yaml
 
 
 def load_yamal():
-    with open('project.yamal', 'r') as file:
+    with open('C:\Users\checc\Readability-Navigator\conf\project.yaml', 'r') as file:
         return yaml.safe_load(file)
 
 def load_json(path):
@@ -29,7 +29,7 @@ def save_pickle(name_file, data):
     with open(name_file, "wb") as pkl:
         pickle.dump(data, pkl)
 
-def load_pickle(name_file, data):
+def load_pickle(name_file):
     with open(name_file, 'rb') as pkl:
         data = pickle.load(pkl)
     return data
