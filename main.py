@@ -9,17 +9,17 @@ import numpy as np
 import pandas as pd
 
 
-
 def load_utils():
     config = load_yamal()
-    path = (r"data/processed/onestop_nltk_features.csv")
-    df = load_csv(path)
 
-    pickle_file = (r"src/features/doc_embedding.pickle")
+    # Percorsi assoluti
+    csv_path = os.path.join(ROOT, "data", "processed", "onestop_nltk_features.csv")
+    pickle_file = os.path.join(ROOT, "src", "features", "doc_embedding.pickle")
+
+    df = load_csv(csv_path)
     embedding = load_pickle(pickle_file)
 
     return config, df, embedding
-
 
 
 def main():
@@ -40,7 +40,7 @@ def main():
         profile_path="user10.json"
     )
     
-            
+
     #score = engine.recommender(user, doc_id)
     #rank = engine.rank_top_k(user)
     rank = engine.rank_to_df(user)
@@ -48,7 +48,7 @@ def main():
     #print("Score:", score)
     #print("Top K Recommendations:", rank)
     #rank.to_csv('test3.csv', index=True)
-    print(rank['score'])
+    return rank
     
     
 if __name__ == "__main__":
