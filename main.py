@@ -1,6 +1,6 @@
 import sys
 import os
-ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+ROOT = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, ROOT)
 
 from src.recommender.recommender_engine import RecommenderEngine
@@ -9,17 +9,18 @@ import numpy as np
 import pandas as pd
 
 
+
 def load_utils():
     config = load_yamal()
 
-    # Percorsi assoluti
     csv_path = os.path.join(ROOT, "data", "processed", "onestop_nltk_features.csv")
-    pickle_file = os.path.join(ROOT, "src", "features", "doc_embedding.pickle")
+    pickle_path = os.path.join(ROOT, "src", "features", "doc_embedding.pickle")
 
     df = load_csv(csv_path)
-    embedding = load_pickle(pickle_file)
+    embedding = load_pickle(pickle_path)
 
     return config, df, embedding
+
 
 
 def main():
@@ -30,7 +31,7 @@ def main():
         "topic_vector": list(np.random.rand(384)),
         "history": []
     }
-    doc_id = "Amazon-Ele_easy"
+    #doc_id = "Amazon-Ele_easy"
 
     engine = RecommenderEngine(
         df=df,
@@ -48,7 +49,7 @@ def main():
     #print("Score:", score)
     #print("Top K Recommendations:", rank)
     #rank.to_csv('test3.csv', index=True)
-    return rank
+    return rank['testo']
     
     
 if __name__ == "__main__":

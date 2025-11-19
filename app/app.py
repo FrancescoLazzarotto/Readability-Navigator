@@ -1,21 +1,20 @@
 import streamlit as st
-from main import main
-import pandas as pd
-import numpy as np
-""
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from components.sidebar import render_sidebar
+from components.layout import page_header, divider
+from components.widgets import user_form
+from main import main  
 
+render_sidebar()
 
-st.title("Readability Navigator")
+page_header("Readability Navigator", "Generatore di raccomandazioni")
 
+submitted, user = user_form()
 
-df = main()
-st.write(df.head())
-st.button("Genera Raccomandazioni") 
-chart_data = pd.DataFrame(
-     np.random.randn(20, 3),
-     columns=['a', 'b', 'c'])
+divider()
 
-st.line_chart(chart_data)
-
-
-
+if submitted:
+    df = main()
+    st.dataframe(df)
