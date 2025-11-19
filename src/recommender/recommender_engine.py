@@ -7,7 +7,6 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 
 
-
 class RecommenderEngine():
     def __init__(self, df, embedding, config, user_id, profile_path):
         self.df = df
@@ -30,6 +29,7 @@ class RecommenderEngine():
         target = profile["target_readability"]
         history = set(profile["history"])
         df = self.df[~self.df["id"].isin(history)]
+        #df = self.df.query('id not in @history')
         df = df[np.abs(df["flesch_score"] - target) <= tol]
         return df
     
@@ -86,14 +86,44 @@ class RecommenderEngine():
         catalog = self.catalog(profile)
         
         scores = []
+        titles = []
+        testi = []
+
         
         for doc_id in catalog['id'].tolist():
             score = self.recommender(user, doc_id)
             scores.append((doc_id, score))
-        
+            
+               
         scores.sort(key=lambda x: x[1], reverse=True)
+        top_scores = scores[:k]
+        titles = [item[0] for item in top_scores]
+        scores_only = [item[1] for item in top_scores]
+        scores_only = np.round(scores_only, 6)
         
-        return scores[:k]
+        for doc_id in titles:
+            testo,_ = self.get_document(doc_id)
+            testi.append(testo)
+        
+        
+        return titles, scores_only, testi
+    
+    def rank_to_df(self, user):
+        df = pd.DataFrame(dict(
+            title = list(),
+            score = list(),
+            testo = list()
+        ))
+        
+        title, score, testo = self.rank_top_k(user)
+        
+        df['title'] = title
+        df['score'] = score
+        df['testo'] = testo
+        
+        return df
+    
+        
         
         
         

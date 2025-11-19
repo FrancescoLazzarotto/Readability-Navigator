@@ -6,6 +6,7 @@ sys.path.insert(0, ROOT)
 from src.recommender.recommender_engine import RecommenderEngine
 from utils.io_utils import load_csv, load_pickle, load_yamal
 import numpy as np 
+import pandas as pd
 
 
 
@@ -39,12 +40,18 @@ def main():
         profile_path="user10.json"
     )
     
-    score = engine.recommender(user, doc_id)
-    rank = engine.rank_top_k(user)
+            
+    #score = engine.recommender(user, doc_id)
+    #rank = engine.rank_top_k(user)
+    rank = engine.rank_to_df(user)
     
-    print("Score:", score)
-    print("Top K Recommendations:", rank)
-
-
+    #print("Score:", score)
+    #print("Top K Recommendations:", rank)
+    #rank.to_csv('test3.csv', index=True)
+    print(rank['score'])
+    
+    
 if __name__ == "__main__":
     main()
+
+
