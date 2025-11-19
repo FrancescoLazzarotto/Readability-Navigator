@@ -3,11 +3,19 @@ import pandas as pd
 import os
 import pickle
 import yaml
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+def load_yaml(path=None):
+    
+    if path is None:
+        path = os.path.join(ROOT_DIR, 'conf', 'project.yaml')
+        
+    if not os.path.exists(path):
+        raise FileNotFoundError(f"File di configurazione non trovato: {path}")
 
-def load_yamal():
-    with open(r'C:\Users\checc\Readability-Navigator\conf\project.yaml', 'r') as file:
+    with open(path, 'r', encoding='utf-8') as file:
         return yaml.safe_load(file)
+
 
 def load_json(path):
     with open(path, "r", encoding="utf-8") as f:

@@ -23,4 +23,6 @@ user = {
     }
 if submitted:
     df = main(user)
-    st.dataframe(df)
+    st.write(df)
+    #st.dataframe(df)
+    
