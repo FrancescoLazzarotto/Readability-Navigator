@@ -5,8 +5,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, ROOT)
-from features.embeddings import sentences_embedding, model_embedding  
-from utils.io_utils import save_json
+
 
 def user_model(user_id, chosen_cluster, df, embedding, default_readability = 60):
     
@@ -36,10 +35,6 @@ profile = {
     "history": []
 }
 
-path = (r".\user")
-save_json(profile, path)
-
-model = model_embedding()
 
 
 

@@ -12,7 +12,7 @@ from components.sidebar import render_sidebar
 render_sidebar()
 
 # Header
-page_header("📊 Dataset e Preprocessing", "Esplorazione e preparazione dei dati")
+page_header("Dataset e Preprocessing", "Esplorazione e preparazione dei dati")
 
 divider()
 
@@ -27,19 +27,19 @@ def load_dataset():
 df = load_dataset()
 
 # Dataset Overview
-section_title("📈 Panoramica del Dataset")
+section_title(" Panoramica del Dataset")
 
 if df is not None:
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        st.metric("📁 Numero di Documenti", len(df))
+        st.metric(" Numero di Documenti", len(df))
     with col2:
-        st.metric("📝 Numero di Colonne", len(df.columns))
+        st.metric(" Numero di Colonne", len(df.columns))
     with col3:
-        st.metric("💾 Memoria Utilizzata", f"{df.memory_usage(deep=True).sum() / 1024**2:.2f} MB")
+        st.metric(" Memoria Utilizzata", f"{df.memory_usage(deep=True).sum() / 1024**2:.2f} MB")
     with col4:
-        st.metric("🔤 Valori Mancanti", df.isnull().sum().sum())
+        st.metric(" Valori Mancanti", df.isnull().sum().sum())
     
     divider()
     
@@ -58,7 +58,7 @@ if df is not None:
     divider()
     
     # Flesch Score Distribution
-    section_title("📊 Distribuzione dei Flesch Score")
+    section_title(" Distribuzione dei Flesch Score")
     
     if 'flesch_score' in df.columns:
         fig = px.histogram(
@@ -80,20 +80,20 @@ if df is not None:
         # Statistiche Flesch
         col1, col2, col3, col4, col5 = st.columns(5)
         with col1:
-            st.metric("📈 Media", f"{df['flesch_score'].mean():.2f}")
+            st.metric(" Media", f"{df['flesch_score'].mean():.2f}")
         with col2:
-            st.metric("📊 Mediana", f"{df['flesch_score'].median():.2f}")
+            st.metric(" Mediana", f"{df['flesch_score'].median():.2f}")
         with col3:
-            st.metric("🔽 Min", f"{df['flesch_score'].min():.2f}")
+            st.metric(" Min", f"{df['flesch_score'].min():.2f}")
         with col4:
-            st.metric("🔼 Max", f"{df['flesch_score'].max():.2f}")
+            st.metric(" Max", f"{df['flesch_score'].max():.2f}")
         with col5:
-            st.metric("📐 Std Dev", f"{df['flesch_score'].std():.2f}")
+            st.metric(" Std Dev", f"{df['flesch_score'].std():.2f}")
     
     divider()
     
     # Anteprima Dati
-    section_title("👁️ Anteprima dei Dati")
+    section_title(" Anteprima dei Dati")
     
     st.write("Primi 5 documenti del dataset:")
     if 'testo' in df.columns:

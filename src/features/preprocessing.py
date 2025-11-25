@@ -86,6 +86,8 @@ def preprocessing(text):
         "perc_long_words": perc_long_words,
         "flesch_score": flesch_score
     })
+
+
     
 
 features = dataframe["testo"].apply(preprocessing)

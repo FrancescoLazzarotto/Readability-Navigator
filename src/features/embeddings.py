@@ -3,14 +3,30 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 from sklearn.cluster import KMeans
 from sklearn.feature_extraction.text import TfidfVectorizer
+from bertopic import BERTopic
 from collections import Counter
-from utils.io_utils import load_data, save_pickle, load_pickle
+import matplotlib.pyplot as plt 
+import sys
+import os 
+from umap import UMAP
+from hdbscan import HDBSCAN
+from loguru import logger
+
+
+
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "..", ".."))
+sys.path.insert(0, PROJECT_ROOT)
+
+from utils.io_utils import load_csv, save_pickle, load_pickle, load_yaml
+
+
 
 
 path = r"C:\Users\checc\OneDrive\Desktop\readability-navigator\data\processed\onestop_nltk_features.csv"
 PATH_OUTPUT_DIR = "data_artifacts/"
 try: 
-    dataframe = load_data(path)
+    dataframe = load_csv(path)
 except FileNotFoundError:
     raise FileNotFoundError(f"File non trovato nel path {path}")
 
@@ -36,14 +52,81 @@ def topic_embedding(topic_text, model):
     return embedding[0].tolist()
 
 
+#embedding = sentences_embedding(sentences, model)
+#save_pickle('doc_embedding.pickle', embedding)
+
+
+
+logger.add("pipeline.log")
+
+def topic_model(df):
+    text = df["testo"]
+
+    logger.info("Inizio embedding")
+    embedder = SentenceTransformer("all-mpnet-base-v2")
+    embeddings = embedder.encode(text, show_progress_bar=True)
+
+    logger.info("UMAP")
+    umap_model = UMAP(n_neighbors=15, n_components=5, min_dist=0.0)
+
+    logger.info("HDBSCAN")
+    hdbscan_model = HDBSCAN(min_cluster_size=10)
+
+    logger.info("BERTopic final")
+    model = BERTopic(umap_model=umap_model,
+                     hdbscan_model=hdbscan_model)
+    topics, probs = model.fit_transform(text, embeddings)
+    model.get_topic_info()
+    return topics, probs, model
+
+config = load_yaml() 
+rel_df_path = config['paths']['features_csv'] 
+df_path = os.path.join(PROJECT_ROOT, rel_df_path) 
+df = load_csv(df_path) 
+topic_model(df)
+
+"""
+def clustering(emb):
+    
+   
+    sse = {}
+    for k in range(1, 20):
+        kmeans = KMeans(n_clusters=k, random_state=0, n_init="auto")
+        kmeans.fit(emb)
+        sse[k] = kmeans.inertia_
+        
+        
+    plt.figure()
+    plt.plot(list(sse.keys()), list(sse.values()))
+    plt.xlabel("Number of cluster")
+    plt.ylabel("SSE")
+    plt.show()
+   
+    for k in range(2, 20):
+        kmeans = KMeans(n_clusters=k, random_state=0, n_init="auto")
+        labels = kmeans.fit_predict(emb)
+        score = silhouette_score(emb, labels)
+        print(k, score)
+    
+    
+
+rel_pickle_path = config['paths']['embeddings_pickle']
+pickle_path = os.path.join(PROJECT_ROOT , rel_pickle_path)
+
+emb = load_pickle(pickle_path)
+
+clustering(emb)
+
+
+
 def similarity_embedding(embedding, model):     
     similarity = model.similarity(embedding, embedding)
     return similarity
+"""
 
 
 
-#embedding = sentences_embedding(sentences, model)
-#save_pickle('doc_embedding.pickle', embedding)
+
 
 
 
