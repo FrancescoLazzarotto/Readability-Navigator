@@ -47,9 +47,9 @@ def sentences_embedding(sentences, model):
                             )
     return embedding
 
-def topic_embedding(topic_text, model):
-    embedding = model.encode([topic_text], truncate_dim=512)
-    return embedding[0].tolist()
+#def topic_embedding(topic_text, model):
+    #embedding = model.encode([topic_text], truncate_dim=512)
+    #return embedding[0].tolist()
 
 
 #embedding = sentences_embedding(sentences, model)
@@ -57,14 +57,11 @@ def topic_embedding(topic_text, model):
 
 
 
+
 logger.add("pipeline.log")
 
-def topic_model(df):
+def topic_model(df, emb):
     text = df["testo"]
-
-    logger.info("Inizio embedding")
-    embedder = SentenceTransformer("all-mpnet-base-v2")
-    embeddings = embedder.encode(text, show_progress_bar=True)
 
     logger.info("UMAP")
     umap_model = UMAP(n_neighbors=15, n_components=5, min_dist=0.0)
@@ -75,15 +72,21 @@ def topic_model(df):
     logger.info("BERTopic final")
     model = BERTopic(umap_model=umap_model,
                      hdbscan_model=hdbscan_model)
-    topics, probs = model.fit_transform(text, embeddings)
-    model.get_topic_info()
-    return topics, probs, model
+    topics= model.fit_transform(text, emb)
+    #model.get_topic_info()
+    model.visualize_document_datamap(text, embeddings=emb)
+    return topics, model
 
 config = load_yaml() 
+rel_emb = config['paths']['embeddings_pickle']
+emb_path = os.path.join(PROJECT_ROOT, rel_emb)
+emb = load_pickle(emb_path)
 rel_df_path = config['paths']['features_csv'] 
 df_path = os.path.join(PROJECT_ROOT, rel_df_path) 
 df = load_csv(df_path) 
-topic_model(df)
+topics, probs, model = topic_model(df, emb)
+model.get_topic_info()
+
 
 """
 def clustering(emb):

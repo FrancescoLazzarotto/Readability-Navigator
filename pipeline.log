@@ -1,1 +1,33 @@
 2025-11-25 11:28:19.567 | INFO     | __main__:topic_model:65 - Inizio embedding
+2025-11-28 10:13:40.126 | INFO     | __main__:topic_model:65 - Inizio embedding
+2025-11-28 10:14:55.298 | INFO     | __main__:topic_model:65 - Inizio embedding
+2025-11-28 10:45:50.129 | INFO     | __main__:topic_model:66 - UMAP
+2025-11-28 10:45:50.130 | INFO     | __main__:topic_model:69 - HDBSCAN
+2025-11-28 10:45:50.131 | INFO     | __main__:topic_model:72 - BERTopic final
+2025-11-28 10:47:36.677 | INFO     | __main__:topic_model:66 - UMAP
+2025-11-28 10:47:36.678 | INFO     | __main__:topic_model:69 - HDBSCAN
+2025-11-28 10:47:36.679 | INFO     | __main__:topic_model:72 - BERTopic final
+2025-11-28 10:52:48.269 | INFO     | __main__:topic_model:66 - UMAP
+2025-11-28 10:52:48.270 | INFO     | __main__:topic_model:69 - HDBSCAN
+2025-11-28 10:52:48.271 | INFO     | __main__:topic_model:72 - BERTopic final
+2025-11-28 10:53:56.736 | INFO     | __main__:topic_model:66 - UMAP
+2025-11-28 10:53:56.737 | INFO     | __main__:topic_model:69 - HDBSCAN
+2025-11-28 10:53:56.738 | INFO     | __main__:topic_model:72 - BERTopic final
+2025-11-28 10:55:48.756 | INFO     | __main__:topic_model:66 - UMAP
+2025-11-28 10:55:48.757 | INFO     | __main__:topic_model:69 - HDBSCAN
+2025-11-28 10:55:48.758 | INFO     | __main__:topic_model:72 - BERTopic final
+2025-11-29 18:41:38.491 | INFO     | __main__:topic_model:66 - UMAP
+2025-11-29 18:41:38.492 | INFO     | __main__:topic_model:69 - HDBSCAN
+2025-11-29 18:41:38.493 | INFO     | __main__:topic_model:72 - BERTopic final
+2025-11-29 18:45:30.908 | INFO     | __main__:topic_model:66 - UMAP
+2025-11-29 18:45:30.908 | INFO     | __main__:topic_model:69 - HDBSCAN
+2025-11-29 18:45:30.909 | INFO     | __main__:topic_model:72 - BERTopic final
+2025-11-29 19:00:37.191 | INFO     | __main__:topic_model:66 - UMAP
+2025-11-29 19:00:37.192 | INFO     | __main__:topic_model:69 - HDBSCAN
+2025-11-29 19:00:37.193 | INFO     | __main__:topic_model:72 - BERTopic final
+2025-11-29 19:02:20.217 | INFO     | __main__:topic_model:66 - UMAP
+2025-11-29 19:02:20.218 | INFO     | __main__:topic_model:69 - HDBSCAN
+2025-11-29 19:02:20.219 | INFO     | __main__:topic_model:72 - BERTopic final
+2025-12-01 16:32:50.941 | INFO     | __main__:topic_model:66 - UMAP
+2025-12-01 16:32:50.942 | INFO     | __main__:topic_model:69 - HDBSCAN
+2025-12-01 16:32:50.942 | INFO     | __main__:topic_model:72 - BERTopic final
