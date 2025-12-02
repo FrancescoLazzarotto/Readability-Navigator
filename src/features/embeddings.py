@@ -59,11 +59,9 @@ def sentences_embedding(sentences, model):
 
 
 
-logger.add("pipeline.log")
 
 def topic_model(df, emb):
     text = df["testo"]
-
     logger.info("UMAP")
     umap_model = UMAP(n_neighbors=15, n_components=5, min_dist=0.0)
 
@@ -75,14 +73,17 @@ def topic_model(df, emb):
     model = BERTopic(umap_model=umap_model,
                      hdbscan_model=hdbscan_model,
                      vectorizer_model=vectorizer_model)
-    topics= model.fit_transform(text, emb)
-    #model.get_topic_info()
-    #model.visualize_document_datamap(text, embeddings=emb)
+    topics = model.fit_transform(text, emb)
+
     return topics, model
+    
 
 
 def visualize_document_data(df, model, emb):
     return model.visualize_document_datamap(df, embeddings=emb)
+
+
+    
 
 config = load_yaml() 
 rel_emb = config['paths']['embeddings_pickle']
@@ -93,65 +94,10 @@ rel_df_path = config['paths']['features_csv']
 df_path = os.path.join(PROJECT_ROOT, rel_df_path) 
 df = load_csv(df_path) 
 
-
 topics, model = topic_model(df, emb)
-fig = visualize_document_data(df['testo'], model, emb)
-output_path = r"C:\Users\checc\OneDrive\Desktop\readability-navigator\data\processed\datamap.png"
-
-try:
-    print("Tentativo di salvataggio immagine...")
-    fig.savefig(output_path , bbox_inches="tight") 
-    print(f"Immagine salvata correttamente in: {output_path}")
-except ValueError as e:
-    print("ERRORE: Assicurati di aver fatto 'pip install kaleido' nel terminale.")
-    print(f"Dettaglio errore: {e}")
-except Exception as e:
-    print(f"Errore generico durante il salvataggio: {e}")
-
-
-"""
-def clustering(emb):
-    
-   
-    sse = {}
-    for k in range(1, 20):
-        kmeans = KMeans(n_clusters=k, random_state=0, n_init="auto")
-        kmeans.fit(emb)
-        sse[k] = kmeans.inertia_
-        
-        
-    plt.figure()
-    plt.plot(list(sse.keys()), list(sse.values()))
-    plt.xlabel("Number of cluster")
-    plt.ylabel("SSE")
-    plt.show()
-   
-    for k in range(2, 20):
-        kmeans = KMeans(n_clusters=k, random_state=0, n_init="auto")
-        labels = kmeans.fit_predict(emb)
-        score = silhouette_score(emb, labels)
-        print(k, score)
-    
-    
-
-rel_pickle_path = config['paths']['embeddings_pickle']
-pickle_path = os.path.join(PROJECT_ROOT , rel_pickle_path)
-
-emb = load_pickle(pickle_path)
-
-clustering(emb)
-
-
-
-def similarity_embedding(embedding, model):     
-    similarity = model.similarity(embedding, embedding)
-    return similarity
-"""
-
-
-
-
-
-
-
-
+df.head()
+classes = df['titolo']
+text = df['testo']
+topic_class = model.topics_per_class(text, classes)
+df.head()
+#model.visualize_topics_per_class(topic_class)
