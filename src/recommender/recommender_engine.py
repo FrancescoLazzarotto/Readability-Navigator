@@ -61,6 +61,9 @@ class RecommenderEngine():
         emb = emb.reshape(1, -1)
         sim_score = cosine_similarity(topic_vector, emb)[0][0]
         return sim_score
+    
+    def get_theme(theme):
+        NotImplementedError
         
     def recommender(self, user, doc_id):
         config = self.config
