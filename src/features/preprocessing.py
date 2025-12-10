@@ -7,7 +7,16 @@ input_df = "./ingest/data/interim/onestop_texts.csv"
 dataframe = pd.read_csv(input_df)
 dataframe.head()
 
+
 def count_syllables(word):
+    """Conteggio sillabe in una parola
+    
+    Args: 
+        word (str): parola di cui conteggiare le sillabe
+    
+    Returns:
+        int: numero sillabe
+    """
     vowels = "aeiouy"
     word = word.lower().strip()
     syllables = 0
@@ -29,12 +38,40 @@ def count_syllables(word):
     return syllables
 
 def flesch_ease_reading(num_words, num_sentences, num_syllables):
+    """Calcolo flesch ease reading score di un testo
+    
+    Args:
+        num_words (int): numero di parole nel testo
+        num_sentences (int): numero di frasi nel testo
+        num_syllables (int): numero di sillabe nel testo
+    
+    Returns:
+        float: punteggio flesch ease reading arrotondato a due decimali 
+                (valore più alto indica una maggiore facilità di lettura)
+    
+    """
     if num_sentences == 0 or num_words == 0:
         return 0
     res = 206.835 - 1.015 * (num_words / num_sentences) - 84.6 * (num_syllables / num_words)
     return round(res, 2)
 
+
 def preprocessing(text):
+    """Calcola statistiche di base e punteggio di leggibilità su un testo
+
+    Args:
+        text (str): testo da analizzare
+
+    Returns:
+        pd.Series: Serie Pandas contenente le seguenti informazioni:
+            num_sentences (int): numero di frasi nel testo
+            num_words (int): numero di parole alfabetiche nel testo
+            avg_sentence_length (float): lunghezza media delle frasi in numero di parole
+            avg_word_length (float): lunghezza media delle parole
+            long_words (list of str): lista delle parole con più di 6 lettere
+            perc_long_words (float): percentuale di parole lunghe sul totale
+            flesch_score (float): punteggio Flesch Reading Ease del testo
+    """
     sentences = sent_tokenize(text)
     words = word_tokenize(text)
     
@@ -47,9 +84,9 @@ def preprocessing(text):
     num_words = len(word_alphabetic)
            
     if num_sentences > 0:
-        avg_sentence_lenght = num_words / num_sentences
+        avg_sentence_length = num_words / num_sentences
     else:
-        avg_sentence_lenght = 0
+        avg_sentence_length = 0
         
     total_length = 0
     for word in word_alphabetic:
@@ -80,16 +117,21 @@ def preprocessing(text):
     return pd.Series({
         "num_sentences": num_sentences,
         "num_words": num_words,
-        "avg_sentence_lenght": avg_sentence_lenght,
+        "avg_sentence_lenght": avg_sentence_length,
         "avg_word_lenght": avg_word_length,
         "long_words": long_words,
         "perc_long_words": perc_long_words,
         "flesch_score": flesch_score
     })
 
-
+"""
+text_length (numero di parole)
+– avg_sentence_length
+– avg_word_length
+– lexical_density
+"""
     
-
+"""
 features = dataframe["testo"].apply(preprocessing)
 dataframe = pd.concat([dataframe, features], axis=1)
 
@@ -99,6 +141,6 @@ dataframe.to_csv("data/processed/onestop_nltk_features.csv", index=False, encodi
 
 dataframe.head()
 
-
+"""
 
 

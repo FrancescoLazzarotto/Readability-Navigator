@@ -8,7 +8,21 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 
 class RecommenderEngine():
+    """Classe per il motore di raccomandazione dei contenuti
+
+    questa classe gestisce i dati, gli embeddings dei documenti e il profilo utente
+    per generare raccomandazioni personalizzate
+    """
     def __init__(self, df, embedding, config, user_id, profile_path):
+        """Inizializza il motore di raccomandazione con i dati e le configurazioni
+
+        Args:
+            df (pd.DataFrame): DataFrame dei contenuti
+            embedding (object): embeddings dei documenti
+            config (dict): parametri di configurazione
+            user_id (str): identificativo dell'utente corrente
+            profile_path (str): percorso dei profili utente
+        """
         self.df = df
         self.embedding = embedding
         self.config = config
@@ -18,6 +32,12 @@ class RecommenderEngine():
         
     
     def profile(self):
+        """Carica il file json relativo a un utente se trovato
+        
+        Returns:
+            Dict or None: dati dell'utente se esiste oppure None
+            
+        """
         if self.profile_path and os.path.exists(self.profile_path):
                 return load_json(self.profile_path)
 
@@ -25,6 +45,16 @@ class RecommenderEngine():
         
 
     def catalog(self, profile):
+        """Creazione catalogo utente
+            Filtra i contenuti già visti dall'utente e seleziona quelli
+            con punteggio di leggibilità vicino al target dell'utente
+        
+        Args:
+            profile(dict): dati utente 
+        
+        Returns:
+            df(pandas.DataFrame): dataframe pandas con il catalogo di un utente
+        """
         tol = self.config["tol"]
         target = profile["target_readability"]
         history = set(profile["history"])
@@ -33,6 +63,8 @@ class RecommenderEngine():
         return df
     
     def get_document(self, doc_id):
+        """
+        """
         idx = self.df.index[self.df["id"] == doc_id][0]
         testo = self.df.loc[idx, "testo"]
         emb = self.embedding[idx]

@@ -1,7 +1,7 @@
 k: 10
 eta: 0.6
 zeta: 0.4
-tol: 7
+tol: 7 #soglia -> 
 delta: 2
 alpha: 0.4
 
