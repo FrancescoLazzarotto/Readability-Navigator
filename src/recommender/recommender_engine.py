@@ -143,7 +143,7 @@ class RecommenderEngine():
         Args:
             user (dict): dizionario contenente i dati dell'utente, tra cui 
                         'topic_vector', il vettore tematico dell'utente
-            doc_id (int or str): identificativo  del documento da confrontare
+            doc_id (int): identificativo  del documento da confrontare
 
         Returns:
             float: punteggio di similarità tematica compreso tra -1 e 1
@@ -156,10 +156,31 @@ class RecommenderEngine():
         return sim_score
     
     
-    def get_topic(theme):
-        """Non ancora implementata
+    def get_topic(self, df, doc_id):
+        """Estrarre il topic dal titolo
+        
+        Args:
+            df(pandas.DataFrame): dataframe contenente i dati
+            doc_id(int): identificativo del documento
+        
+        Returns:
+            str: tema estratto dal titolo 
         """
-        NotImplementedError
+        idx = df.index[df["id"] == doc_id]
+        if len(idx) == 0:
+            raise ValueError("Documento non trovato")
+        
+        titles = str(df.loc[idx[0], "titolo"])
+        titles.split()
+        
+        for i in range(len(titles)):
+            if titles[i] == "-":
+                pos = i 
+        "".join(titles)
+        titles = titles[0:pos]
+        
+        return titles
+        
         
         
     def recommender(self, user, doc_id):
