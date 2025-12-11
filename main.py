@@ -11,6 +11,13 @@ import pandas as pd
 
 
 def load_utils():
+    """Caricamento utils: file di configurazione, dataframe, emebedding
+    
+    Returns:
+        dict: dizionario di configurazione
+        pandas.DataFrame: dati
+        list[list[float]]: lista di vettori (embedding) dei testi 
+    """
     config = load_yaml()
 
     rel_csv_path = config['paths']['features_csv']
@@ -27,6 +34,14 @@ def load_utils():
 
 
 def main(user):
+    """Main, richiamo degli utils e creazione dell'oggetto reccomender, ranking dei documento    
+    
+    Args: 
+        user(dict): dizionario contenente dei dati degli utenti
+    
+    Returns:
+        list[List]
+    """
     config, df, embedding = load_utils()
     
     engine = RecommenderEngine(

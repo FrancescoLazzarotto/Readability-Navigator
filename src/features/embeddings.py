@@ -35,22 +35,34 @@ sentences = dataframe['testo']
 
 
 def model_embedding():
+    """Creazione modello
+    
+    Returns: 
+        object: modello SBERT 
+    """
     model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
     return model 
+
 
 model = model_embedding()
 
 def sentences_embedding(sentences, model):
+    """Generazione vettorizzazione del testo 
+    
+    Args: 
+        sentences(str): testo da vettorizzare
+        model (obj): modello SBERT per fare l'embedding
+    
+    Returns:
+        list[list[float]]: embedding dei testi sotto forma di liste di vettori  
+    
+    """
     
     embedding = model.encode(
         sentences,
         truncate_dim = 512
                             )
     return embedding
-
-#def topic_embedding(topic_text, model):
-    #embedding = model.encode([topic_text], truncate_dim=512)
-    #return embedding[0].tolist()
 
 
 #embedding = sentences_embedding(sentences, model)
@@ -61,6 +73,16 @@ def sentences_embedding(sentences, model):
 
 
 def topic_model(df, emb):
+    """Generazione topic sulla base della vettorizzazione
+    
+    Args:
+        df(pandas.DatFrame): dataframe 
+        emb(list[list[float]]): embedding dei testi sotto forma di liste di vettori
+        
+    Returns:
+        
+        object: modello BERTopic (clustering=hdbscan, dimensionality, reduction=umap, vectorizer=CountVectorizer) 
+    """
     text = df["testo"]
     logger.info("UMAP")
     umap_model = UMAP(n_neighbors=15, n_components=5, min_dist=0.0)
@@ -80,6 +102,17 @@ def topic_model(df, emb):
 
 
 def visualize_document_data(df, model, emb):
+    """Visualizzare i dati dei documenti
+    
+    Args:
+        df(pandas.DataFrame):
+        model(object):
+        emb(list[list[float]]):
+    
+    Returns:
+        pyplot: grafico di visualizzazione
+    
+    """
     return model.visualize_document_datamap(df, embeddings=emb)
 
 

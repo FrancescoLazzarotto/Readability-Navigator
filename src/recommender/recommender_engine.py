@@ -243,7 +243,7 @@ class RecommenderEngine():
 
         Returns:
             pandas.DataFrame:
-                -title(str): id dei documenti
+                -title(str): id dei documenti       
                 -score(float): punteggio di raccomandazione
                 -testo(str): testo dei documenti
         """
