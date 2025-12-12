@@ -14,7 +14,6 @@ from hdbscan import HDBSCAN
 from loguru import logger
 
 
-
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "..", ".."))
 sys.path.insert(0, PROJECT_ROOT)
@@ -22,11 +21,15 @@ sys.path.insert(0, PROJECT_ROOT)
 from utils.io_utils import load_csv, save_pickle, load_pickle, load_yaml
 
 
+config = load_yaml() 
+rel_config = config['paths']['features_csv']
+path = os.path.join(PROJECT_ROOT, rel_config)
 
 
-path = r"C:\Users\checc\OneDrive\Desktop\readability-navigator\data\processed\onestop_nltk_features.csv"
-PATH_OUTPUT_DIR = "data_artifacts/"
+#path = r"C:\Users\checc\OneDrive\Desktop\Readability-Navigator\data\processed\onestop_nltk_features.csv"
+
 try: 
+    
     dataframe = load_csv(path)
 except FileNotFoundError:
     raise FileNotFoundError(f"File non trovato nel path {path}")
@@ -68,7 +71,7 @@ def sentences_embedding(sentences, model):
 #embedding = sentences_embedding(sentences, model)
 #save_pickle('doc_embedding.pickle', embedding)
 
-
+    
 
 
 
@@ -116,9 +119,12 @@ def visualize_document_data(df, model, emb):
     return model.visualize_document_datamap(df, embeddings=emb)
 
 
-    
+def visualize_heatmap(model):
+    return model.visualize_heatmap()
 
-config = load_yaml() 
+
+
+
 rel_emb = config['paths']['embeddings_pickle']
 emb_path = os.path.join(PROJECT_ROOT, rel_emb)
 emb = load_pickle(emb_path)
@@ -134,3 +140,4 @@ text = df['testo']
 topic_class = model.topics_per_class(text, classes)
 df.head()
 #model.visualize_topics_per_class(topic_class)
+#model.visualize_heatmap()
