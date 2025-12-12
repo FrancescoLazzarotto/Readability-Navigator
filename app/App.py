@@ -70,25 +70,7 @@ if user_mode == "Crea Nuovo Utente":
         generate_btn = st.button("Genera Raccomandazioni", key="generate_new")
     
     divider()
-    
-    st.write("Seleziona Argomento")
-    
-    available_topics = [
-        "None","Amazon","Amsterdam","Arctic","Banksy","Brazil","Climate Change","Copyright",
-        "Crowdfunding","Denmark","Everest","Exercise","Facebook","False Memory"
-    ]
-    
-    selected_topic_raw = st.selectbox(
-        "Scegli un argomento",
-        available_topics
-    )
 
-    if selected_topic_raw == "None": 
-        selected_topic = None
-    else: 
-        selected_topic = selected_topic_raw
-    
-    
     if generate_btn: 
         np.random.seed(new_user_id)
         topic_vector = list(np.random.rand(384))
@@ -107,7 +89,7 @@ if user_mode == "Crea Nuovo Utente":
         section_title("Raccomandazioni per Utente #" + str(new_user_id))
         
         try:
-            df = main(user, selected_topic)
+            df = main(user)
             if df is not None and len(df) > 0:
                 st.success(f"Trovate {len(df)} raccomandazioni!")
                 st.dataframe(df, use_container_width=True)
@@ -132,7 +114,6 @@ else:
     
     existing_users = []
 
-# Cerca i profili nella cartella principale del progetto
     for file in os.listdir(PROJECT_DIR):
         if file.startswith("user") and file.endswith("son"):
             path = os.path.join(PROJECT_DIR, file)
@@ -196,13 +177,13 @@ else:
             if selected_topic_raw == "None": 
                 selected_topic = None
             else:
-                selected_topic_raw
+                selected_topic = selected_topic_raw
 
             if load_btn:
                 section_title("Raccomandazioni per Utente #" + str(selected_user_id))
                 
                 try:
-                    df = main(user_profile, selected_topic)
+                    df = main(user_profile)
                     if df is not None and len(df) > 0:
                         st.success(f"Trovate {len(df)} raccomandazioni!")
                         st.dataframe(df, use_container_width=True)
