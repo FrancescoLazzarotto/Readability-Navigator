@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Data e file temporanei
+*.csv
+*.pkl
+*.pickle
+*.json
+*.db
+
+# Streamlit cache
+.streamlit/
+
+# Config locali
+.env
+config.yaml
+user.json
+
+# IDE / editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
