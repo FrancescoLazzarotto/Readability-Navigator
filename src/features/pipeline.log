@@ -1,9 +1,0 @@
-2025-12-01 17:47:50.405 | INFO     | __main__:topic_model:66 - UMAP
-2025-12-01 17:47:50.406 | INFO     | __main__:topic_model:69 - HDBSCAN
-2025-12-01 17:47:50.407 | INFO     | __main__:topic_model:72 - BERTopic final
-2025-12-01 17:52:04.940 | INFO     | __main__:topic_model:67 - UMAP
-2025-12-01 17:52:04.940 | INFO     | __main__:topic_model:67 - UMAP
-2025-12-01 17:52:04.950 | INFO     | __main__:topic_model:70 - HDBSCAN
-2025-12-01 17:52:04.950 | INFO     | __main__:topic_model:70 - HDBSCAN
-2025-12-01 17:52:04.957 | INFO     | __main__:topic_model:74 - BERTopic final
-2025-12-01 17:52:04.957 | INFO     | __main__:topic_model:74 - BERTopic final
