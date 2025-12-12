@@ -8,16 +8,11 @@ from utils.io_utils import load_csv, load_pickle, load_yaml
 import numpy as np 
 import pandas as pd
 
+print(">>> LOADED main CON PARAMETRO selected_topic <<<")
+
 
 
 def load_utils():
-    """Caricamento utils: file di configurazione, dataframe, emebedding
-    
-    Returns:
-        dict: dizionario di configurazione
-        pandas.DataFrame: dati
-        list[list[float]]: lista di vettori (embedding) dei testi 
-    """
     config = load_yaml()
 
     rel_csv_path = config['paths']['features_csv']
@@ -33,15 +28,16 @@ def load_utils():
 
 
 
-def main(user):
-    """Main, richiamo degli utils e creazione dell'oggetto reccomender, ranking dei documento    
+def main(user, selected_topic=None):
     
-    Args: 
-        user(dict): dizionario contenente dei dati degli utenti
+    if user is None:
+        user = {
+            "user_id": 1,
+            "target_readability": 60,
+            "topic_vector": list(np.random.rand(384)),
+            "history": []
+        }
     
-    Returns:
-        list[List]
-    """
     config, df, embedding = load_utils()
     
     engine = RecommenderEngine(
@@ -52,17 +48,10 @@ def main(user):
         profile_path= None
     )
     
-    rank = engine.rank_to_df(user)
+    rank = engine.rank_to_df(user, selected_topic)
     
     return rank
 
 
-if __name__ == "__main__":
-    user = {
-        "user_id": 10,
-        "target_readability": 60,
-        "topic_vector": list(np.random.rand(384)),
-        "history": []
-    }
-    main(user)
+
 
