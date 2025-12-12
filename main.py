@@ -28,7 +28,7 @@ def load_utils():
 
 
 
-def main(user, selected_topic=None):
+def main(user):
     
     if user is None:
         user = {
@@ -48,7 +48,7 @@ def main(user, selected_topic=None):
         profile_path= None
     )
     
-    rank = engine.rank_to_df(user, selected_topic)
+    rank = engine.rank_to_df(user)
     
     return rank
 
