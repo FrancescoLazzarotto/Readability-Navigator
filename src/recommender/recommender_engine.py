@@ -43,26 +43,9 @@ class RecommenderEngine():
         return None
     
     
-    def get_topic(self, df, idx):
-        """Estrarre il topic dal titolo
-        
-        Args:
-            df(pandas.DataFrame): dataframe contenente i dati
-            doc_id(int): identificativo del documento
-        
-        Returns:
-            str: tema estratto dal titolo 
-        """
-        title = str(df.loc[idx, "titolo"])
-        if "-" in title:
-            topic = title.split("-", 1)[0].strip()
-        else:
-            topic = title.strip()
-        return topic
-    
       
 
-    def catalog(self, profile, selected_topic=None):
+    def catalog(self, profile):
         """Creazione catalogo utente.
         Filtra i contenuti già visti dall'utente e seleziona quelli
         con punteggio di leggibilità vicino al target dell'utente.
@@ -79,20 +62,7 @@ class RecommenderEngine():
         history = set(profile["history"])
         df = self.df[~self.df["id"].isin(history)]
         df = df[np.abs(df["flesch_score"] - target) <= tol]
-    
-   
-        if selected_topic and selected_topic != "None":
-            df_filtered = []
-            for idx in df.index:
-                doc_id = df.loc[idx, "id"]
-                try:
-                    doc_topic = self.get_topic(df, doc_id)
-                    if selected_topic.lower() in doc_topic.lower():
-                        df_filtered.append(idx)
-                except:
-                    pass
-            df = df.loc[df_filtered] if df_filtered else df
-        
+          
         return df
 
     
@@ -192,7 +162,6 @@ class RecommenderEngine():
         sim_score = cosine_similarity(topic_vector, emb)[0][0]
         return sim_score
     
- 
         
     def recommender(self, user, doc_id):
         """Calcola il punteggio di raccomandazione di un documento per un utente.
@@ -225,7 +194,7 @@ class RecommenderEngine():
         return score         
 
 
-    def rank_top_k(self, user, selected_topic=None):
+    def rank_top_k(self, user):
         """Raccomandare e classificare i top k documenti 
         
         Args:
@@ -240,7 +209,7 @@ class RecommenderEngine():
         config = self.config
         k = config['k']
         profile = user
-        catalog = self.catalog(profile, selected_topic=selected_topic)
+        catalog = self.catalog(profile)
         
         scores = []
         titles = []
@@ -248,11 +217,8 @@ class RecommenderEngine():
 
         
         for doc_id in catalog['id'].tolist():
-            if selected_topic and selected_topic != "None":
-                score = self.recommender_topic_only(user, doc_id, selected_topic)
-            else:
-                score = self.recommender(user, doc_id)
-                scores.append((doc_id, score))
+            score = self.recommender(user, doc_id)
+            scores.append((doc_id, score))
                                
         scores.sort(key=lambda x: x[1], reverse=True)
         top_scores = scores[:k]
@@ -269,7 +235,7 @@ class RecommenderEngine():
     
     
     
-    def rank_to_df(self, user, selected_topic=None):
+    def rank_to_df(self, user):
         """Convertire la classificazione dei documenti raccomandati in un pandas.DataFrame
         
         Args:
@@ -287,7 +253,7 @@ class RecommenderEngine():
             testo = list()
         ))
         
-        title, score, testo = self.rank_top_k(user, selected_topic=selected_topic)
+        title, score, testo = self.rank_top_k(user)
         
         df['title'] = title
         df['score'] = score
