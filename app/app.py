@@ -15,14 +15,14 @@ json_path = os.path.normpath(json_path)
 with open(json_path, "r", encoding="utf-8") as f:
     data = json.load(f)
 
-st.write("Percorso JSON:", json_path)  
+#st.write("Percorso JSON:", json_path)  
 
 
 with open(json_path, "r", encoding="utf-8") as f:
     data = json.load(f)
 from components.sidebar import render_sidebar
 from components.layout import page_header, divider, section_title
-from main import main
+from main import main 
 
 render_sidebar()
 
@@ -74,34 +74,40 @@ if user_mode == "Crea Nuovo Utente":
     st.write("Seleziona Argomento")
     
     available_topics = [
-        "Amazon","Amsterdam","Arctic","Banksy","Brazil","Climate Change","Copyright",
+        "None","Amazon","Amsterdam","Arctic","Banksy","Brazil","Climate Change","Copyright",
         "Crowdfunding","Denmark","Everest","Exercise","Facebook","False Memory"
     ]
     
-    selected_topic = st.selectbox(
+    selected_topic_raw = st.selectbox(
         "Scegli un argomento",
         available_topics
     )
+
+    if selected_topic_raw == "None": 
+        selected_topic = None
+    else: 
+        selected_topic = selected_topic_raw
     
-    if generate_btn:
+    
+    if generate_btn: 
         np.random.seed(new_user_id)
-        topic_vec = list(np.random.rand(384))
+        topic_vector = list(np.random.rand(384))
         
         user = {
-            "user_id": new_user_id,
-            "target_readability": target_readability,
-            "topic_vector": topic_vec,
-            "history": [],
-            "profile_path": f"user{new_user_id}.json"
+        "user_id": new_user_id,
+        "target_readability": target_readability,
+        "topic_vector": topic_vector,
+        "history": [],
+        "profile_path": f"user{new_user_id}.json"
         }
-        
+
         st.session_state.last_user_id = new_user_id
         
         divider()
         section_title("Raccomandazioni per Utente #" + str(new_user_id))
         
         try:
-            df = main(user)
+            df = main(user, selected_topic)
             if df is not None and len(df) > 0:
                 st.success(f"Trovate {len(df)} raccomandazioni!")
                 st.dataframe(df, use_container_width=True)
@@ -114,8 +120,12 @@ if user_mode == "Crea Nuovo Utente":
                         st.divider()
             else:
                 st.warning("Nessuna raccomandazione disponibile con questi parametri")
+                st.dataframe(df)
         except Exception as e:
             st.error(f"Errore nel caricamento: {str(e)}")
+
+
+
 
 else:
     section_title("Usa Profilo Utente Esistente")
@@ -171,12 +181,28 @@ else:
                 st.metric("Documenti Visti", len(user_profile.get("history", [])))
 
             divider()
-            
+            st.write("Seleziona Argomento")
+
+            available_topics = [
+                "Amazon","Amsterdam","Arctic","Banksy","Brazil","Climate Change","Copyright",
+                "Crowdfunding","Denmark","Everest","Exercise","Facebook","False Memory"
+            ]
+
+            selected_topic_raw = st.selectbox(
+                "Scegli un argomento",
+                available_topics
+            )
+
+            if selected_topic_raw == "None": 
+                selected_topic = None
+            else:
+                selected_topic_raw
+
             if load_btn:
                 section_title("Raccomandazioni per Utente #" + str(selected_user_id))
                 
                 try:
-                    df = main(user_profile)
+                    df = main(user_profile, selected_topic)
                     if df is not None and len(df) > 0:
                         st.success(f"Trovate {len(df)} raccomandazioni!")
                         st.dataframe(df, use_container_width=True)
