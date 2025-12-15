@@ -4,6 +4,7 @@ import numpy as np
 from src.user.model_user import user_model
 from utils.io_utils import load_json
 from sklearn.metrics.pairwise import cosine_similarity
+from user.model_user import load_user_model
 
 
 
@@ -35,10 +36,10 @@ class RecommenderEngine():
         """Carica il file json relativo a un utente se trovato
         
         Returns:
-            Dict or None: dati dell'utente se esiste oppure None    
+            dict or None: dati dell'utente se esiste oppure None    
         """
         if self.profile_path and os.path.exists(self.profile_path):
-                return load_json(self.profile_path)
+                return load_user_model(self.profile_path)
 
         return None
     
