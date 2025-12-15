@@ -71,73 +71,19 @@ def sentences_embedding(sentences, model):
 #embedding = sentences_embedding(sentences, model)
 #save_pickle('doc_embedding.pickle', embedding)
 
-    
 
-
-
-def topic_model(df, emb):
-    """Generazione topic sulla base della vettorizzazione
+def get_document_embedding(doc_id, df, embedding):
+    """
+    Estrae l'embedding di un documento specifico
     
     Args:
-        df(pandas.DatFrame): dataframe 
-        emb(list[list[float]]): embedding dei testi sotto forma di liste di vettori
-        
-    Returns:
-        
-        object: modello BERTopic (clustering=hdbscan, dimensionality, reduction=umap, vectorizer=CountVectorizer) 
-    """
-    text = df["testo"]
-    logger.info("UMAP")
-    umap_model = UMAP(n_neighbors=15, n_components=5, min_dist=0.0)
-
-    logger.info("HDBSCAN")
-    hdbscan_model = HDBSCAN(min_cluster_size=10)
-    vectorizer_model = CountVectorizer(stop_words="english")
-    
-    logger.info("BERTopic final")
-    model = BERTopic(umap_model=umap_model,
-                     hdbscan_model=hdbscan_model,
-                     vectorizer_model=vectorizer_model)
-    topics = model.fit_transform(text, emb)
-
-    return topics, model
-    
-
-
-def visualize_document_data(df, model, emb):
-    """Visualizzare i dati dei documenti
-    
-    Args:
-        df(pandas.DataFrame):
-        model(object):
-        emb(list[list[float]]):
+        doc_id (str): ID del documento (es: "Amazon-Ele_easy")
+        df (pd.DataFrame): dataframe con i dati
+        embedding (array): array con TUTTI gli embedding caricati dal pickle
     
     Returns:
-        pyplot: grafico di visualizzazione
-    
+        list: embedding del documento specifico
     """
-    return model.visualize_document_datamap(df, embeddings=emb)
-
-
-def visualize_heatmap(model):
-    return model.visualize_heatmap()
-
-
-
-
-rel_emb = config['paths']['embeddings_pickle']
-emb_path = os.path.join(PROJECT_ROOT, rel_emb)
-emb = load_pickle(emb_path)
-
-rel_df_path = config['paths']['features_csv'] 
-df_path = os.path.join(PROJECT_ROOT, rel_df_path) 
-df = load_csv(df_path) 
-
-topics, model = topic_model(df, emb)
-df.head()
-classes = df['titolo']
-text = df['testo']
-topic_class = model.topics_per_class(text, classes)
-df.head()
-#model.visualize_topics_per_class(topic_class)
-#model.visualize_heatmap()
+    idx = df.index[df["id"] == doc_id][0]
+    doc_embedding = embedding[idx].tolist()
+    return doc_embedding
