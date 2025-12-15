@@ -109,3 +109,16 @@ def load_pickle(name_file):
         data = pickle.load(pkl)
     return data
         
+def find(name, path):
+    """Trovare un file in una directory
+    
+    Args:
+        name (str): nome del file da trovare
+        path (str): path in cui cercare
+        
+    Returns:
+        str: path preciso del file trovato
+    """
+    for root, dirs, files in os.walk(path):
+        if name in files:
+            return os.path.join(root, name)
