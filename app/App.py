@@ -1,29 +1,21 @@
 import streamlit as st
-import numpy as np
-import json
 import os
 import sys
-import os
-import json
-import streamlit as st
 
-APP_DIR = os.path.dirname(os.path.abspath(__file__))   # prog/app
-PROJECT_DIR = os.path.dirname(APP_DIR)                 # prog
-json_path = os.path.join(PROJECT_DIR, "user.json")     # prog/file.json
-json_path = os.path.normpath(json_path)
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, ".."))
+sys.path.insert(0, PROJECT_ROOT)
 
-with open(json_path, "r", encoding="utf-8") as f:
-    data = json.load(f)
-
-#st.write("Percorso JSON:", json_path)  
-
-
-with open(json_path, "r", encoding="utf-8") as f:
-    data = json.load(f)
 from components.sidebar import render_sidebar
 from components.layout import page_header, divider, section_title
 from main import main 
+from src.user.model_user import build_user_model, load_user_model, update_user_model, save_user_json
+from utils.io_utils import load_yaml
 
+config = load_yaml()
+rel_path_users = config['paths']['user_json']
+users_path = os.path.join(PROJECT_ROOT, rel_path_users)
+os.makedirs(users_path, exist_ok=True)
 render_sidebar()
 
 page_header("Readability Navigator", "Generatore di raccomandazioni personalizzate")
@@ -60,7 +52,7 @@ if user_mode == "Crea Nuovo Utente":
             "Target Readability",
             min_value=0,
             max_value=100,
-            value=60,
+            value=0,
             step=5
         )
     
@@ -72,16 +64,7 @@ if user_mode == "Crea Nuovo Utente":
     divider()
 
     if generate_btn: 
-        np.random.seed(new_user_id)
-        topic_vector = list(np.random.rand(384))
-        
-        user = {
-        "user_id": new_user_id,
-        "target_readability": target_readability,
-        "topic_vector": topic_vector,
-        "history": [],
-        "profile_path": f"user{new_user_id}.json"
-        }
+        user = build_user_model(new_user_id, default_readability=target_readability, save=True)
 
         st.session_state.last_user_id = new_user_id
         
@@ -113,10 +96,10 @@ else:
     section_title("Usa Profilo Utente Esistente")
     
     existing_users = []
-
-    for file in os.listdir(PROJECT_DIR):
+    
+    for file in os.listdir(users_path):
         if file.startswith("user") and file.endswith("son"):
-            path = os.path.join(PROJECT_DIR, file)
+            path = os.path.join(users_path, file)
             try:
                 uid = int(file[4:-5])
                 existing_users.append((uid, path))
@@ -145,12 +128,9 @@ else:
         selected_file = [path for uid, path in existing_users if uid == selected_user_id][0]
         
         try:
-            
-            user_profile = data
+            user_profile = load_user_model(f"user{selected_user_id}.json", users_path)
             if user_profile is not None:
-                    print("Dati ricevuti")
-            else: 
-                    print("Dati non ricevuti")
+                st.success(f"Profilo caricato: Utente #{selected_user_id}")
             
             col1, col2, col3 = st.columns(3)
             
@@ -162,22 +142,7 @@ else:
                 st.metric("Documenti Visti", len(user_profile.get("history", [])))
 
             divider()
-            st.write("Seleziona Argomento")
-
-            available_topics = [
-                "Amazon","Amsterdam","Arctic","Banksy","Brazil","Climate Change","Copyright",
-                "Crowdfunding","Denmark","Everest","Exercise","Facebook","False Memory"
-            ]
-
-            selected_topic_raw = st.selectbox(
-                "Scegli un argomento",
-                available_topics
-            )
-
-            if selected_topic_raw == "None": 
-                selected_topic = None
-            else:
-                selected_topic = selected_topic_raw
+            
 
             if load_btn:
                 section_title("Raccomandazioni per Utente #" + str(selected_user_id))
@@ -204,3 +169,5 @@ else:
     
     else:
         st.info("Nessun profilo utente esistente. Crea un nuovo utente per iniziare!")
+        print("Percorso calcolato da Python:", users_path)
+        print("Percorso calcolato da Python:", PROJECT_ROOT)

@@ -8,8 +8,6 @@ from utils.io_utils import load_csv, load_pickle, load_yaml
 import numpy as np 
 import pandas as pd
 
-print(">>> LOADED main CON PARAMETRO selected_topic <<<")
-
 
 
 def load_utils():
