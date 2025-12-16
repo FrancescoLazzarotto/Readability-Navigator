@@ -45,7 +45,7 @@ class RecommenderEngine():
     
       
 
-    def catalog(self, profile, selected_topic=None):
+    def catalog(self, profile):
         """Creazione catalogo utente.
         Filtra i contenuti già visti dall'utente e seleziona quelli
         con punteggio di leggibilità vicino al target dell'utente.
@@ -64,8 +64,6 @@ class RecommenderEngine():
         df = self.df[~self.df["id"].isin(history)]
         df = df[np.abs(df["flesch_score"] - target) <= tol]
         
-        if selected_topic:
-            df = df[df["title"].str.lower().str.contains(selected_topic.lower(), na=False)]
           
         return df
 
