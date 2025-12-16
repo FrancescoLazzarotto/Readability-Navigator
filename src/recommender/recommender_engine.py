@@ -1,10 +1,8 @@
 import os
 import pandas as pd
 import numpy as np 
-from src.user.model_user import user_model
-from utils.io_utils import load_json
 from sklearn.metrics.pairwise import cosine_similarity
-from user.model_user import load_user_model
+from src.user.model_user import load_user_model
 
 
 
@@ -38,18 +36,20 @@ class RecommenderEngine():
         Returns:
             dict or None: dati dell'utente se esiste oppure None    
         """
-        if self.profile_path and os.path.exists(self.profile_path):
-                return load_user_model(self.profile_path)
-
-        return None
+        try:
+            filename = f"user{self.user_id}.json"
+            return load_user_model(filename, self.profile_path)
+        except FileNotFoundError:
+            return None
     
     
       
 
-    def catalog(self, profile):
+    def catalog(self, profile, selected_topic=None):
         """Creazione catalogo utente.
         Filtra i contenuti già visti dall'utente e seleziona quelli
         con punteggio di leggibilità vicino al target dell'utente.
+        Opzionalmente filtra anche per argomento.
         
         Args:
             profile (dict): dati utente
@@ -63,6 +63,9 @@ class RecommenderEngine():
         history = set(profile["history"])
         df = self.df[~self.df["id"].isin(history)]
         df = df[np.abs(df["flesch_score"] - target) <= tol]
+        
+        if selected_topic:
+            df = df[df["title"].str.lower().str.contains(selected_topic.lower(), na=False)]
           
         return df
 
