@@ -11,30 +11,6 @@ config = load_yaml()
 rel_path_users = config['paths']['user_json']
 users_path = os.path.join(PROJECT_ROOT, rel_path_users)
 
-def build_user_model(user_id, topic_vector, default_readability=60, save=True):
-    """Crea un nuovo profilo utente e lo salva
-    
-    Args:
-        user_id (int): identificativo univoco dell'utente
-        topic_vector (list): vettore di embedding dell'argomento di interesse
-        default_readability (int): target readability preferito (default 60)
-        save (bool): se True, salva il profilo nel JSON (default True)
-    
-    Returns:
-        dict: dizionario con i dati dell'utente
-    """
-    user = {
-        "user_id": user_id,
-        "topic_vector": topic_vector,
-        "target_readability": default_readability,
-        "history": []
-    }
-    
-    if save:
-        save_user_json(user, user_id)
-    
-    return user
-
 def save_user_json(user, user_id):
     """Salva un profilo utente nel file JSON
     
@@ -46,6 +22,32 @@ def save_user_json(user, user_id):
     file_name = f"user{user_id}.json"
     path = os.path.join(users_path, file_name)
     save_json(user, path)
+    
+    
+
+def build_user_model(user_id, default_readability=60, save=True):
+    """Crea un nuovo profilo utente e lo salva
+    
+    Args:
+        user_id (int): identificativo univoco dell'utente
+        default_readability (int): target readability preferito (default 60)
+        save (bool): se True, salva il profilo nel JSON (default True)
+    
+    Returns:
+        dict: dizionario con i dati dell'utente
+    """
+    np.random.seed(user_id)
+    user = {
+        "user_id": user_id,
+        "topic_vector": list(np.random.rand(384)),
+        "target_readability": default_readability,
+        "history": []
+    }
+    
+    if save:
+        save_user_json(user, user_id)
+    
+    return user
 
 
 
@@ -75,7 +77,7 @@ def load_user_model(name, path):
     
     return user
 
-def update_user_profile(user, doc_id, doc_embedding, alpha=0.3):
+def update_user_model(user, doc_id, doc_embedding, alpha=0.3):
     """
     Aggiorna il profilo utente quando legge un documento
     
@@ -88,18 +90,15 @@ def update_user_profile(user, doc_id, doc_embedding, alpha=0.3):
     Returns:
         dict: profilo utente aggiornato
     """
-    
     if doc_id not in user["history"]:
         user["history"].append(doc_id)
     
+    old_vector = list(user["topic_vector"])
+    new_embedding = list(doc_embedding)
     
-    old_vector = np.array(user["topic_vector"])
-    new_embedding = np.array(doc_embedding)
-    
-    updated_vector = (1 - alpha) * old_vector + alpha * new_embedding
+    updated_vector = ((1 - alpha) * old_vector) + (alpha * new_embedding)
     user["topic_vector"] = updated_vector.tolist()
     
-   
     save_user_json(user, user["user_id"])
     
     return user
