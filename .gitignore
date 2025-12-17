@@ -19,7 +19,7 @@ env/
 *.pickle
 *.json
 *.db
-
+*.npy
 # Streamlit cache
 .streamlit/
 

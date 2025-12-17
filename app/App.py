@@ -64,7 +64,7 @@ if user_mode == "Crea Nuovo Utente":
     divider()
 
     if generate_btn: 
-        user = build_user_model(new_user_id, default_readability=target_readability, save=True)
+        user = build_user_model(user_id = new_user_id, default_readability=target_readability, save=True)
 
         st.session_state.last_user_id = new_user_id
         
@@ -74,14 +74,19 @@ if user_mode == "Crea Nuovo Utente":
         try:
             df = main(user)
             if df is not None and len(df) > 0:
+                
                 st.success(f"Trovate {len(df)} raccomandazioni!")
+                st.write("Scegli quale raccomandazione leggere: ")
                 st.dataframe(df, use_container_width=True)
+                
+                
+                
                 
                 with st.expander("Visualizza Dettagli Completi"):
                     for idx, row in df.iterrows():
                         st.markdown(f"### {row['title']}")
                         st.write(f"Score: {row['score']:.4f}")
-                        st.write(f"Testo:\n{row['testo'][:500]}...")
+                        st.write(f"Testo:\n{row['testo']}")
                         st.divider()
             else:
                 st.warning("Nessuna raccomandazione disponibile con questi parametri")
@@ -157,7 +162,7 @@ else:
                             for idx, row in df.iterrows():
                                 st.markdown(f"### {row['title']}")
                                 st.write(f"Score: {row['score']:.4f}")
-                                st.write(f"Testo:\n{row['testo'][:500]}...")
+                                st.write(f"Testo:\n{row['testo']}")
                                 st.divider()
                     else:
                         st.warning("Nessuna raccomandazione disponibile per questo utente")

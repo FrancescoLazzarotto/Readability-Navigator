@@ -48,8 +48,8 @@ class RecommenderEngine():
     def catalog(self, profile):
         """Creazione catalogo utente.
         Filtra i contenuti già visti dall'utente e seleziona quelli
-        con punteggio di leggibilità vicino al target dell'utente.
-        Opzionalmente filtra anche per argomento.
+        con punteggio di leggibilità vicino al target dell'utente
+        Opzionalmente filtra anche per argomento
         
         Args:
             profile (dict): dati utente
@@ -166,7 +166,7 @@ class RecommenderEngine():
     
         
     def recommender(self, user, doc_id):
-        """Calcola il punteggio di raccomandazione di un documento per un utente.
+        """Calcola il punteggio di raccomandazione di un documento per un utente
 
             Il punteggio combina la similarità tematica con l'adeguatezza della
             leggibilità rispetto al target dell'utente, applicando una penalità
@@ -174,10 +174,10 @@ class RecommenderEngine():
 
         Args:
             user (dict): dizionario contenente i dati dell'utente
-            doc_id (int or str): identificativo del documento da valutare.
+            doc_id (int or str): identificativo del documento da valutare
 
         Returns:
-            float: punteggio di raccomandazione del documento per l'utente.
+            float: punteggio di raccomandazione del documento per l'utente
                    valori più alti indicano contenuti più raccomandati
         """
         config = self.config

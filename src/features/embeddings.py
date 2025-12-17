@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from sklearn.cluster import KMeans
+import umap 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import CountVectorizer
 from bertopic import BERTopic
@@ -87,3 +88,5 @@ def get_document_embedding(doc_id, df, embedding):
     idx = df.index[df["id"] == doc_id][0]
     doc_embedding = embedding[idx].tolist()
     return doc_embedding
+
+
