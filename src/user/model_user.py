@@ -106,35 +106,107 @@ def load_user_model(name, path):
     
     return user
 
-def update_user_model(user, doc_id, doc_embedding, alpha=0.3):
-    """
-    Aggiorna il profilo utente quando legge un documento
+
+
+def difficulty_to_alpha(difficulty):
+    """Mappamento della difficultà dell'utente espressa in feedback (1-5) con valori alpha
     
     Args:
-        user (dict): profilo utente
-        doc_id (str): ID del documento letto
-        doc_embedding (list): embedding del documento
-        alpha (float): peso del nuovo documento (0.3 = 30% nuovo, 70% passato)
-    
+        difficulty(int): difficoltà espressa dall'utente
+        
     Returns:
-        dict: profilo utente aggiornato
+        float: alpha corrispondente alla difficoltà espressa
     """
-    if doc_id not in user["history"]:
-        user["history"].append(doc_id)
+    mapping = {
+        1: 0.1,
+        2: 0.2,
+        3: 0.4,
+        4: 0.2,
+        5: 0.1
+    }
+    return mapping.get(difficulty, 0.1)
+
+
+def update_topic_vector(user, doc_embedding, difficulty):
+    """Aggiornamento topic_vector dell'user model
+    
+    Args: 
+        user (dict): user model dell'utente
+        doc_embedding (list[list[float]]): embedding del documento specifico 
+        difficulty (int): difficoltà di feedback espressa dall'utente convertita tramite la funzione in alpha
+        
+    Returns:
+        list[list[float]]: vettore aggiornato in base al peso 
+    """
+    alpha = difficulty_to_alpha(difficulty)
     
     old_vector = np.array(user["topic_vector"])
     new_embedding = np.array(doc_embedding)
     
-    new_embedding = new_embedding / np.linealg.norm(new_embedding)
-    
-    updated_vector = ((1 - alpha) * old_vector) + (alpha * new_embedding)
-    
+    new_embedding = new_embedding / np.linalg.norm(new_embedding)
+    updated_vector = ((1- alpha) * old_vector) + (alpha * new_embedding)
     updated_vector = updated_vector / np.linalg.norm(updated_vector)
-    user["topic_vector"] = updated_vector.tolist()
+    
+    return updated_vector
+    
+
+def update_target_readability(old_target, doc_readability, difficulty, learning_rate = 0.1):
+    """Aggiornamento target readaibiity dell'user model
+        -negativo troppo facile positivo troppo difficile 
+    
+    Args:
+        old_target(int): target readability dell'user model
+        doc_readability(int): leggibilità del documento
+        difficulty(int): difficoltà espressa dall'utente (1-5)
+        learning_rate(float): parametro che controlla la dimensione del passo per la modalità di aggiornamento
+    
+    Returns:
+        int: target readability dell'utente aggiornato
+    """
+    error = difficulty - 3 
+    shift = learning_rate * error * (old_target - doc_readability)
+    
+    new_target = old_target - shift
+    
+    return new_target
+
+
+def update_history(user, doc_id):
+    if doc_id not in user["history"]:
+        user["history"].append(doc_id)
+        
+    
+def update_user_model(user, doc_id, doc_embedding, doc_readability, difficulty):
+    """
+    Aggiorna il profilo utente quando legge un documento - richiama le funzioni per aggiornare:
+        -topic_vector 
+        -target_readability
+        -history
+    
+    Args:
+        user (dict): user model dell'utente
+        doc_id (int or str): identificativo del documento appena letto 
+        doc_embedding (list[list[float]]): embedding del documento appena letto
+        doc_readability (int or float): leggibilità del documento
+        difficulty (int): difficoltà espressa dall'utente (1-5)
+    
+    Returns:
+        dict: user model aggiornato - history, topic_vector, target_readability
+        
+    """
+    update_history(user, doc_id)
+    
+    new_vector = update_topic_vector(user, doc_embedding, difficulty)
+    new_target = update_target_readability(user['target_readability'], doc_readability, difficulty)
+    
+    user['topic_vector'] = new_vector.tolist()
+    user['target_readability'] = new_target
     
     save_user_json(user, user["user_id"])
     
     return user
+
+
 
 
 
