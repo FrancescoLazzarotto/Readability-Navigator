@@ -5,11 +5,14 @@ import sys
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "..", ".."))
 sys.path.insert(0, PROJECT_ROOT)
-from utils.io_utils import load_json, load_yaml, save_json
+from utils.io_utils import load_json, load_yaml, save_json, load_pickle
 config = load_yaml() 
 
 rel_path_users = config['paths']['user_json']
 users_path = os.path.join(PROJECT_ROOT, rel_path_users)
+rel_emb = config['paths']['embeddings_pickle']
+emb_path = os.path.join(PROJECT_ROOT, rel_emb)
+emb = load_pickle(emb_path)
 
 def save_user_json(user, user_id):
     """Salva un profilo utente nel file JSON
@@ -24,22 +27,48 @@ def save_user_json(user, user_id):
     save_json(user, path)
     
     
+    
 
-def build_user_model(user_id, default_readability=60, save=True):
+def initialize_topic_vector(embedding):
+    """Calcola il topic vector iniziale come centroide del corpus
+    
+    Args:
+        embedding (np. ndarray): matrice N x 384 degli embedding
+    
+    Returns: 
+        np.ndarray: vettore 1 x 384 
+    """
+    emb = np.array(embedding)
+    norm_emb = emb / np.linalg.norm(emb, axis=1, keepdims=True)
+    mean = np.mean(norm_emb, axis=0)
+    norm_mean = mean / np.linalg.norm(mean)
+    np.save("topic_vector_init.npy", norm_mean)
+    
+
+initialize_topic_vector(emb)
+
+
+
+def build_user_model(user_id, *, topic_vector_default=None, default_readability=60, save=True):
     """Crea un nuovo profilo utente e lo salva
     
     Args:
         user_id (int): identificativo univoco dell'utente
+        topic_vector_init (np.ndarray): vettore iniziale 1 x 384
         default_readability (int): target readability preferito (default 60)
         save (bool): se True, salva il profilo nel JSON (default True)
     
     Returns:
         dict: dizionario con i dati dell'utente
     """
-    np.random.seed(user_id)
+    
+    if topic_vector_default is None:
+        topic_vector_default = np.load("topic_vector_init.npy")
+    
+    
     user = {
         "user_id": user_id,
-        "topic_vector": list(np.random.rand(384)),
+        "topic_vector": topic_vector_default.tolist(),
         "target_readability": default_readability,
         "history": []
     }
@@ -93,10 +122,14 @@ def update_user_model(user, doc_id, doc_embedding, alpha=0.3):
     if doc_id not in user["history"]:
         user["history"].append(doc_id)
     
-    old_vector = list(user["topic_vector"])
-    new_embedding = list(doc_embedding)
+    old_vector = np.array(user["topic_vector"])
+    new_embedding = np.array(doc_embedding)
+    
+    new_embedding = new_embedding / np.linealg.norm(new_embedding)
     
     updated_vector = ((1 - alpha) * old_vector) + (alpha * new_embedding)
+    
+    updated_vector = updated_vector / np.linalg.norm(updated_vector)
     user["topic_vector"] = updated_vector.tolist()
     
     save_user_json(user, user["user_id"])
