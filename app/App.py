@@ -16,6 +16,15 @@ config = load_yaml()
 rel_path_users = config['paths']['user_json']
 users_path = os.path.join(PROJECT_ROOT, rel_path_users)
 os.makedirs(users_path, exist_ok=True)
+
+if "selected_doc" not in st.session_state:
+    st.session_state.selected_doc = None
+
+if "current_user" not in st.session_state:
+    st.session_state.current_user = None
+
+
+
 render_sidebar()
 
 page_header("Readability Navigator", "Generatore di raccomandazioni personalizzate")
@@ -65,29 +74,90 @@ if user_mode == "Crea Nuovo Utente":
 
     if generate_btn: 
         user = build_user_model(user_id = new_user_id, default_readability=target_readability, save=True)
-
+        st.session_state.current_user = user 
         st.session_state.last_user_id = new_user_id
+        st.session_state.show_recommendations_new = True
         
+    if st.session_state.get("show_recommendations_new", False):
         divider()
-        section_title("Raccomandazioni per Utente #" + str(new_user_id))
+        section_title("Raccomandazioni per Utente #" + str(st.session_state.current_user['user_id']))
         
         try:
-            df = main(user)
+            df = st.session_state.get("recommendations_df")
+            if df is None:
+                df = main(st.session_state.current_user)
+                st.session_state.recommendations_df = df
+            
             if df is not None and len(df) > 0:
                 
                 st.success(f"Trovate {len(df)} raccomandazioni!")
                 st.write("Scegli quale raccomandazione leggere: ")
                 st.dataframe(df, use_container_width=True)
                 
-                
-                
-                
+                section_title("Seleziona un testo da leggere")
+
+                doc_titles = df["title"].tolist()
+
+                selected_title = st.selectbox(
+                    "Scegli un testo da leggere",
+                    options=doc_titles,
+                    key="doc_selector_new"
+                )
+
+                col1, col2 = st.columns([1, 3])
+                with col1:
+                    if st.button("Apri testo", key="open_btn_new"):
+                        matching_docs = df[df["title"] == selected_title]
+                        if len(matching_docs) > 0:
+                            st.session_state.selected_doc = matching_docs.iloc[0].to_dict()
+                        else:
+                            st.error("Documento non trovato")
+
+                if st.session_state.selected_doc is not None:
+                    divider()
+                    section_title("Testo selezionato")
+                    doc = st.session_state.selected_doc
+
+                    st.markdown(f"### {doc['title']}")
+                    st.markdown(f"**Score:** {doc['score']:.4f}")
+                    st.markdown(f"**Flesch Score {doc['flesch_score']:.4f}")
+                    st.divider()
+                    st.write(doc["testo"])
+
+                    difficulty = st.radio(
+                        "Quanto hai trovato difficile questo testo?",
+                        options=[1, 2, 3, 4, 5],
+                        format_func=lambda x: {
+                            1: "Molto facile",
+                            2: "Facile",
+                            3: "Adeguato",
+                            4: "Difficile",
+                            5: "Molto difficile"
+                        }[x],
+                        key="difficulty_radio_new"
+                    )
+
+                    col1, col2 = st.columns([1, 3])
+                    with col1:
+                        if st.button("Conferma valutazione", key="confirm_btn_new"):
+                            try:
+                                doc_id = str(doc['title'])
+                                doc_readability = float(doc.get('flesch_score', 60))
+                                difficulty_val = int(difficulty)
+                                update_user_model(st.session_state.current_user, doc_id, doc_readability, difficulty_val)
+                                st.success("Feedback registrato e profilo aggiornato!")
+                                st.session_state.selected_doc = None
+                                st.rerun()
+                            except Exception as e:
+                                st.error(f"Errore nell'aggiornamento del profilo: {str(e)}")
+
+                """
                 with st.expander("Visualizza Dettagli Completi"):
                     for idx, row in df.iterrows():
                         st.markdown(f"### {row['title']}")
                         st.write(f"Score: {row['score']:.4f}")
                         st.write(f"Testo:\n{row['testo']}")
-                        st.divider()
+                        st.divider() """
             else:
                 st.warning("Nessuna raccomandazione disponibile con questi parametri")
                 st.dataframe(df)
@@ -103,7 +173,7 @@ else:
     existing_users = []
     
     for file in os.listdir(users_path):
-        if file.startswith("user") and file.endswith("son"):
+        if file.startswith("user") and file.endswith(".json"):
             path = os.path.join(users_path, file)
             try:
                 uid = int(file[4:-5])
@@ -127,6 +197,8 @@ else:
             st.write("")
             st.write("")
             load_btn = st.button("Carica Profilo", key="load_existing")
+            if load_btn:
+                st.session_state.show_recommendations_existing = True
         
         divider()
         
@@ -134,6 +206,7 @@ else:
         
         try:
             user_profile = load_user_model(f"user{selected_user_id}.json", users_path)
+            st.session_state.current_user = user_profile 
             if user_profile is not None:
                 st.success(f"Profilo caricato: Utente #{selected_user_id}")
             
@@ -148,15 +221,75 @@ else:
 
             divider()
             
-
-            if load_btn:
+            if st.session_state.get("show_recommendations_existing", False):
                 section_title("Raccomandazioni per Utente #" + str(selected_user_id))
                 
                 try:
-                    df = main(user_profile)
+                    df = st.session_state.get("recommendations_df_existing")
+                    if df is None:
+                        df = main(user_profile)
+                        st.session_state.recommendations_df_existing = df
+                    
                     if df is not None and len(df) > 0:
                         st.success(f"Trovate {len(df)} raccomandazioni!")
+                        st.write("Scegli quale raccomandazione leggere: ")
                         st.dataframe(df, use_container_width=True)
+                        
+                        section_title("Seleziona un testo da leggere")
+
+                        doc_titles = df["title"].tolist()
+
+                        selected_title = st.selectbox(
+                            "Scegli un testo da leggere",
+                            options=doc_titles,
+                            key="doc_selector_existing"
+                        )
+
+                        col1, col2 = st.columns([1, 3])
+                        with col1:
+                            if st.button("Apri testo", key="open_btn_existing"):
+                                matching_docs = df[df["title"] == selected_title]
+                                if len(matching_docs) > 0:
+                                    st.session_state.selected_doc_existing = matching_docs.iloc[0].to_dict()
+                                else:
+                                    st.error("Documento non trovato")
+
+                        if st.session_state.get("selected_doc_existing") is not None:
+                            divider()
+                            section_title("Testo selezionato")
+                            doc = st.session_state.selected_doc_existing
+
+                            st.markdown(f"### {doc['title']}")
+                            st.markdown(f"**Score:** {doc['score']:.4f}")
+                            st.divider()
+                            st.write(doc["testo"])
+
+                            difficulty = st.radio(
+                                "Quanto hai trovato difficile questo testo?",
+                                options=[1, 2, 3, 4, 5],
+                                format_func=lambda x: {
+                                    1: "Molto facile",
+                                    2: "Facile",
+                                    3: "Adeguato",
+                                    4: "Difficile",
+                                    5: "Molto difficile"
+                                }[x],
+                                key="difficulty_radio_existing"
+                            )
+
+                            col1, col2 = st.columns([1, 3])
+                            with col1:
+                                if st.button("Conferma valutazione", key="confirm_btn_existing"):
+                                    try:
+                                        doc_id = str(doc['title'])
+                                        doc_readability = float(doc.get('flesch_score', 60))
+                                        difficulty_val = int(difficulty)
+                                        update_user_model(st.session_state.current_user, doc_id, doc_readability, difficulty_val)
+                                        st.success("Feedback registrato e profilo aggiornato!")
+                                        st.session_state.selected_doc_existing = None
+                                        st.rerun()
+                                    except Exception as e:
+                                        st.error(f"Errore nell'aggiornamento del profilo: {str(e)}")
                         
                         with st.expander("Visualizza Dettagli Completi"):
                             for idx, row in df.iterrows():
@@ -174,5 +307,3 @@ else:
     
     else:
         st.info("Nessun profilo utente esistente. Crea un nuovo utente per iniziare!")
-        print("Percorso calcolato da Python:", users_path)
-        print("Percorso calcolato da Python:", PROJECT_ROOT)
