@@ -20,7 +20,7 @@ PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "..", ".."))
 sys.path.insert(0, PROJECT_ROOT)
 
 from utils.io_utils import load_csv, save_pickle, load_pickle, load_yaml
-
+from utils.data_loader import load_features_df, load_embedding
 
 config = load_yaml() 
 rel_config = config['paths']['features_csv']
@@ -73,20 +73,24 @@ def sentences_embedding(sentences, model):
 #save_pickle('doc_embedding.pickle', embedding)
 
 
-def get_document_embedding(doc_id, df, embedding):
-    """
-    Estrae l'embedding di un documento specifico
+def get_document_embedding(doc_id):
+    """Estrae l'embedding di un documento specifico
     
     Args:
         doc_id (str): ID del documento (es: "Amazon-Ele_easy")
-        df (pd.DataFrame): dataframe con i dati
-        embedding (array): array con TUTTI gli embedding caricati dal pickle
     
     Returns:
         list: embedding del documento specifico
     """
-    idx = df.index[df["id"] == doc_id][0]
-    doc_embedding = embedding[idx].tolist()
-    return doc_embedding
+    df = load_features_df()
+    emb = load_embedding()
+    
+    idx_array = df.index[df["id"] == doc_id].tolist()
+    
+    if len(idx_array) == 0:
+        raise ValueError(f"documento non trovato: {doc_id}")
+    
+    idx = idx_array[0]
+    return emb[idx].tolist()
 
 
