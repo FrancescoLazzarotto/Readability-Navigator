@@ -126,7 +126,7 @@ class RecommenderEngine():
 
     def penalty(self, target, readability, alpha):
         """Calcolo penalità da applicare al testo in base alla leggibilità
-            la penalità aumenta di `alpha` se la leggibilità del testo supera il target dell'utente
+            la penalità aumenta di alpha se la leggibilità del testo supera il target dell'utente
         
         Args:
             target(float): target readability dell'utente
@@ -143,8 +143,7 @@ class RecommenderEngine():
         
         
     def theme_similarity(self, user, doc_id):
-        """
-        Calcola la similarità tematica tra un utente e un documento
+        """Calcola la similarità tematica tra un utente e un documento
 
         La similarità viene calcolata come coseno tra il vettore tematico
         dell'utente e l'embedding del documento
@@ -193,7 +192,7 @@ class RecommenderEngine():
         gap_penalized = gap * penalty_score
         
         score = eta * sim - zeta  * gap_penalized
-        return score         
+        return score, flesch        
 
 
     def rank_top_k(self, user):
@@ -219,21 +218,24 @@ class RecommenderEngine():
 
         
         for doc_id in catalog['id'].tolist():
-            score = self.recommender(user, doc_id)
-            scores.append((doc_id, score))
+            score, flesch = self.recommender(user, doc_id)
+            scores.append((doc_id, score, flesch))
                                
         scores.sort(key=lambda x: x[1], reverse=True)
         top_scores = scores[:k]
+        
         titles = [item[0] for item in top_scores]
         scores_only = [item[1] for item in top_scores]
+        flesch_values = [round(item[2], 2) for item in top_scores]
         scores_only = np.round(scores_only, 6)
+        flesch 
         
         for doc_id in titles:
             testo,_ = self.get_document(doc_id)
             testi.append(testo)
         
         
-        return titles, scores_only, testi
+        return titles, scores_only, testi, flesch_values
     
     
     
@@ -255,11 +257,12 @@ class RecommenderEngine():
             testo = list()
         ))
         
-        title, score, testo = self.rank_top_k(user)
+        title, score, testo, flesch = self.rank_top_k(user)
         
         df['title'] = title
         df['score'] = score
         df['testo'] = testo
+        df['flesch_score'] = flesch
         
         return df
     
