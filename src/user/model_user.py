@@ -6,6 +6,7 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "..", ".."))
 sys.path.insert(0, PROJECT_ROOT)
 from utils.io_utils import load_json, load_yaml, save_json, load_pickle
+from src.features.embeddings import get_document_embedding
 config = load_yaml() 
 
 rel_path_users = config['paths']['user_json']
@@ -175,10 +176,10 @@ def update_history(user, doc_id):
     if doc_id not in user["history"]:
         user["history"].append(doc_id)
         
+        
     
-def update_user_model(user, doc_id, doc_embedding, doc_readability, difficulty):
-    """
-    Aggiorna il profilo utente quando legge un documento - richiama le funzioni per aggiornare:
+def update_user_model(user, doc_id, doc_readability, difficulty):
+    """Aggiorna il profilo utente quando legge un documento - richiama le funzioni per aggiornare:
         -topic_vector 
         -target_readability
         -history
@@ -196,6 +197,7 @@ def update_user_model(user, doc_id, doc_embedding, doc_readability, difficulty):
     """
     update_history(user, doc_id)
     
+    doc_embedding = get_document_embedding(doc_id)
     new_vector = update_topic_vector(user, doc_embedding, difficulty)
     new_target = update_target_readability(user['target_readability'], doc_readability, difficulty)
     
