@@ -27,7 +27,7 @@ env/
 .env
 config.yaml
 user.json
-
+test.py
 # IDE / editor
 .vscode/
 .idea/
