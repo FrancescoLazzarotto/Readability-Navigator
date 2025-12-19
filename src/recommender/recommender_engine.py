@@ -49,7 +49,7 @@ class RecommenderEngine():
         """Creazione catalogo utente.
         Filtra i contenuti già visti dall'utente e seleziona quelli
         con punteggio di leggibilità vicino al target dell'utente
-        Opzionalmente filtra anche per argomento
+       
         
         Args:
             profile (dict): dati utente
@@ -58,6 +58,7 @@ class RecommenderEngine():
         Returns:
             pd.DataFrame: catalogo filtrato dei contenuti
         """
+        self.df["id"] = self.df["id"].astype(str)
         tol = self.config["tol"]
         target = profile["target_readability"]
         history = set(profile["history"])
@@ -108,6 +109,7 @@ class RecommenderEngine():
 
     def gap_readability(self, user, flesch):
         """Calcolo gap di leggibilità fra quella dell'utente e punteggio flesch del testo
+        
         
         Args:
             user(dict): dizionario contenente dati dell'utente fra cui target readability
@@ -228,7 +230,6 @@ class RecommenderEngine():
         scores_only = [item[1] for item in top_scores]
         flesch_values = [round(item[2], 2) for item in top_scores]
         scores_only = np.round(scores_only, 6)
-        flesch 
         
         for doc_id in titles:
             testo,_ = self.get_document(doc_id)
