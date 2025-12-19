@@ -121,9 +121,9 @@ def difficulty_to_alpha(difficulty):
     mapping = {
         1: 0.1,
         2: 0.2,
-        3: 0.4,
-        4: 0.2,
-        5: 0.1
+        3: 0.3,
+        4: 0.4,
+        5: 0.5
     }
     return mapping.get(difficulty, 0.1)
 
@@ -151,7 +151,7 @@ def update_topic_vector(user, doc_embedding, difficulty):
     return updated_vector
     
 
-def update_target_readability(old_target, doc_readability, difficulty, learning_rate = 0.1):
+def update_target_readability(old_target, doc_readability, difficulty, learning_rate = 1):
     """Aggiornamento target readaibiity dell'user model
         -negativo troppo facile positivo troppo difficile 
     
@@ -164,8 +164,18 @@ def update_target_readability(old_target, doc_readability, difficulty, learning_
     Returns:
         int: target readability dell'utente aggiornato
     """
-    error = difficulty - 3 
-    shift = learning_rate * error * (old_target - doc_readability)
+    if difficulty == 3:
+        return old_target
+    if difficulty > 3:
+        direction = 1 
+    else:
+        direction = - 1
+     
+    alpha = difficulty_to_alpha(difficulty)
+     
+    distance = abs(doc_readability - old_target)
+    
+    shift = direction *  learning_rate * alpha * distance
     
     new_target = old_target - shift
     
@@ -173,6 +183,7 @@ def update_target_readability(old_target, doc_readability, difficulty, learning_
 
 
 def update_history(user, doc_id):
+    doc_id = str(doc_id)
     if doc_id not in user["history"]:
         user["history"].append(doc_id)
         
