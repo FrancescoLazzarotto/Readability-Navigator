@@ -226,7 +226,8 @@ else:
                 
                 try:
                     df = st.session_state.get("recommendations_df_existing")
-                    if df is None:
+                    load_btn2 = st.button("Genera Raccomandazioni")
+                    if df is None and load_btn2 is True:
                         df = main(user_profile)
                         st.session_state.recommendations_df_existing = df
                     
@@ -276,12 +277,13 @@ else:
                                 }[x],
                                 key="difficulty_radio_existing"
                             )
-
+                            
                             col1, col2 = st.columns([1, 3])
                             with col1:
                                 if st.button("Conferma valutazione", key="confirm_btn_existing"):
                                     try:
                                         doc_id = str(doc['title'])
+                                        
                                         doc_readability = float(doc.get('flesch_score', 60))
                                         difficulty_val = int(difficulty)
                                         update_user_model(st.session_state.current_user, doc_id, doc_readability, difficulty_val)
