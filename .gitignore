@@ -26,6 +26,7 @@ env/
 # Config locali
 .env
 config.yaml
+project.yaml
 user.json
 test.py
 # IDE / editor
