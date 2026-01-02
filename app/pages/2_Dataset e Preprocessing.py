@@ -30,31 +30,17 @@ df = load_dataset()
 section_title(" Panoramica del Dataset")
 
 if df is not None:
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3 = st.columns(3)
     
     with col1:
         st.metric(" Numero di Documenti", len(df))
     with col2:
         st.metric(" Numero di Colonne", len(df.columns))
     with col3:
-        st.metric(" Memoria Utilizzata", f"{df.memory_usage(deep=True).sum() / 1024**2:.2f} MB")
-    with col4:
         st.metric(" Valori Mancanti", df.isnull().sum().sum())
     
-    divider()
-    
-    # Colonne del Dataset
-    section_title("🔍 Struttura del Dataset")
-    
-    st.write("**Colonne disponibili:**")
-    col_info = pd.DataFrame({
-        "Colonna": df.columns,
-        "Tipo": [str(dtype) for dtype in df.dtypes.values],
-        "Valori Unici": [df[col].nunique() for col in df.columns],
-        "Valori Mancanti": df.isnull().sum().values
-    })
-    st.dataframe(col_info, use_container_width=True)
-    
+ 
+ 
     divider()
     
     # Flesch Score Distribution
@@ -78,7 +64,7 @@ if df is not None:
         st.plotly_chart(fig, use_container_width=True)
         
         # Statistiche Flesch
-        col1, col2, col3, col4, col5 = st.columns(5)
+        col1, col2, col3, col4 = st.columns(4)
         with col1:
             st.metric(" Media", f"{df['flesch_score'].mean():.2f}")
         with col2:
@@ -87,25 +73,14 @@ if df is not None:
             st.metric(" Min", f"{df['flesch_score'].min():.2f}")
         with col4:
             st.metric(" Max", f"{df['flesch_score'].max():.2f}")
-        with col5:
-            st.metric(" Std Dev", f"{df['flesch_score'].std():.2f}")
+
     
     divider()
     
-    # Anteprima Dati
-    section_title(" Anteprima dei Dati")
     
-    st.write("Primi 5 documenti del dataset:")
-    if 'testo' in df.columns:
-        display_cols = [col for col in df.columns if col != 'testo']
-        st.dataframe(df[display_cols].head(), use_container_width=True)
-    else:
-        st.dataframe(df.head(), use_container_width=True)
-    
-    divider()
     
     # Preprocessing Steps
-    section_title("🔧 Passaggi di Preprocessing")
+    section_title(" Passaggi di Preprocessing")
     
     col1, col2 = st.columns(2)
     
@@ -137,41 +112,20 @@ if df is not None:
         """)
     
     divider()
+    # Anteprima Dati
+    section_title(" Anteprima dei Dati")
     
+    st.write("Primi 5 documenti del dataset:")
+    if 'testo' in df.columns:
+        display_cols = [col for col in df.columns if col != 'testo']
+        st.dataframe(df[display_cols].head(), use_container_width=True)
+    else:
+        st.dataframe(df.head(), use_container_width=True)
+    
+    divider()
     # Tecniche Utilizzate
-    section_title("🛠️ Librerie e Tecniche")
     
-    tabs = st.tabs(["NLTK", "Pandas", "Scikit-learn"])
-    
-    with tabs[0]:
-        st.write("""
-        **NLTK (Natural Language Toolkit)**
-        
-        - `punkt`: Tokenizzatore per parole e frasi
-        - `stopwords`: Liste di stop words in italiano e inglese
-        - `WordNetLemmatizer`: Lemmatizzazione delle parole
-        - Flesch Reading Ease: Calcolo del punteggio di leggibilità
-        """)
-    
-    with tabs[1]:
-        st.write("""
-        **Pandas**
-        
-        - Caricamento e manipolazione del CSV
-        - Filtraggio e selezione di colonne
-        - Calcolo di statistiche descrittive
-        - Export dei dati processati
-        """)
-    
-    with tabs[2]:
-        st.write("""
-        **Scikit-learn**
-        
-        - TfidfVectorizer: Vettorializzazione del testo
-        - CountVectorizer: Conteggio delle frequenze
-        - Normalizzazione dei dati
-        """)
 
 else:
-    st.error("❌ Non è stato possibile caricare il dataset")
-    st.info("Assicurati che il file sia presente in: `data/processed/onestop_nltk_features.csv`")
+    st.error(" Non è stato possibile caricare il dataset")
+    st.info("Assicurarsi che il file sia presente in: `data/processed/onestop_nltk_features.csv`")

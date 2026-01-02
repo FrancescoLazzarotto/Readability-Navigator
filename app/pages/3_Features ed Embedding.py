@@ -14,7 +14,7 @@ from components.sidebar import render_sidebar
 render_sidebar()
 
 # Header
-page_header("🧠 Features ed Embedding", "Estrazione di caratteristiche e rappresentazione vettoriale")
+page_header("Features ed Embedding", "Estrazione di caratteristiche e rappresentazione vettoriale")
 
 divider()
 
@@ -39,8 +39,7 @@ def load_embeddings():
 df = load_dataset()
 embeddings = load_embeddings()
 
-# Features Overview
-section_title("📊 Features Estratte")
+section_title("Features Estratte")
 
 if df is not None:
     st.write("""
@@ -51,7 +50,7 @@ if df is not None:
     divider()
     
     # Feature Analysis
-    section_title("🔍 Analisi delle Features")
+    section_title("Analisi delle Features")
     
     # Seleziona solo colonne numeriche e non testuali
     numeric_cols = df.select_dtypes(include=[np.number]).columns.tolist()
@@ -74,7 +73,7 @@ if df is not None:
         divider()
         
         # Visualizzazione Features
-        section_title("📈 Distribuzione delle Features Principali")
+        section_title("Distribuzione delle Features Principali")
         
         if 'flesch_score' in numeric_cols:
             col1, col2 = st.columns(2)
@@ -104,7 +103,7 @@ if df is not None:
     divider()
     
     # Embedding Information
-    section_title("🧬 Embedding Vettoriali")
+    section_title(" Embedding Vettoriali")
     
     st.write("""
     Gli embedding sono rappresentazioni vettoriali dense del testo che catturano 
@@ -115,18 +114,18 @@ if df is not None:
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            st.metric("📦 Numero di Embedding", len(embeddings))
+            st.metric("Numero di Embedding", len(embeddings))
         with col2:
             dim_str = str(embeddings[0].shape[0]) if len(embeddings) > 0 else "N/A"
-            st.write(f"**🔢 Dimensione Embedding:** {dim_str}")
+            st.write(f"** Dimensione Embedding:** {dim_str}")
         with col3:
             mem_str = f"{embeddings.nbytes / 1024**2:.2f} MB" if hasattr(embeddings, 'nbytes') else "N/A"
-            st.write(f"**💾 Memoria:** {mem_str}")
+            st.write(f"** Memoria:** {mem_str}")
         
         divider()
         
         # PCA Visualization
-        section_title("📊 Visualizzazione PCA degli Embedding")
+        section_title(" Visualizzazione PCA degli Embedding")
         
         st.write("Riduzione dei 384 embedding a 2 dimensioni usando PCA per la visualizzazione:")
         
@@ -188,12 +187,12 @@ if df is not None:
             st.error(f"Errore nella visualizzazione PCA: {e}")
     
     else:
-        st.warning("⚠️ Gli embedding non sono disponibili")
+        st.warning(" Gli embedding non sono disponibili")
     
     divider()
     
     # Tecniche di Embedding
-    section_title("🛠️ Tecniche di Embedding")
+    section_title("Tecniche di Embedding")
     
     tabs = st.tabs(["Word Embeddings", "Sentence Embeddings", "TF-IDF"])
     
@@ -230,7 +229,7 @@ if df is not None:
     divider()
     
     # Feature Correlation
-    section_title("🔗 Correlazione tra Features")
+    section_title(" Correlazione tra Features")
     
     if len(numeric_cols) > 1:
         correlation_matrix = df[numeric_cols].corr()
@@ -249,4 +248,4 @@ if df is not None:
         st.plotly_chart(fig_corr, )
 
 else:
-    st.error("❌ Non è stato possibile caricare il dataset")
+    st.error(" Non è stato possibile caricare il dataset")

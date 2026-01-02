@@ -13,12 +13,12 @@ from components.sidebar import render_sidebar
 render_sidebar()
 
 # Header
-page_header("🎯 Recommendation Model", "Sistema di ranking e raccomandazioni personalizzate")
+page_header("Recommendation Model", "Sistema di ranking e raccomandazioni personalizzate")
 
 divider()
 
 # Model Overview
-section_title("📋 Panoramica del Modello")
+section_title(" Panoramica del Modello")
 
 st.write("""
 Il Recommendation Engine combina molteplici fattori per calcolare uno score personalizzato 
@@ -29,7 +29,7 @@ del documento stesso.
 divider()
 
 # Scoring Formula
-section_title("🔢 Formula di Scoring")
+section_title(" Formula di Scoring")
 
 st.markdown("""
 ### Equazione Principale
@@ -46,7 +46,7 @@ Dove:
 divider()
 
 # Componenti del Modello
-section_title("⚙️ Componenti del Modello")
+section_title(" Componenti del Modello")
 
 tab1, tab2, tab3 = st.tabs(["Somiglianza Tematica", "Gap di Leggibilità", "Penalità Dinamica"])
 
@@ -80,8 +80,8 @@ with tab2:
     - Gap > 0: Documento non è al livello target
     
     **Interpretazione:**
-    - Gap piccolo: Documento adatto al livello utente ✅
-    - Gap grande: Documento troppo facile o difficile ❌
+    - Gap piccolo: Documento adatto al livello utente 
+    - Gap grande: Documento troppo facile o difficile 
     """)
 
 with tab3:
@@ -103,7 +103,7 @@ with tab3:
 divider()
 
 # Pipeline del Modello
-section_title("🔄 Pipeline di Ranking")
+section_title(" Pipeline di Ranking")
 
 col1, col2, col3, col4, col5 = st.columns(5)
 
@@ -125,7 +125,7 @@ with col5:
 divider()
 
 # Parametri del Modello
-section_title("⚙️ Parametri Configurabili")
+section_title(" Parametri Configurabili")
 
 col1, col2, col3 = st.columns(3)
 
@@ -156,29 +156,29 @@ with col3:
 divider()
 
 # Algoritmo Completo
-section_title("🔍 Algoritmo Completo")
+section_title(" Algoritmo Completo")
 
 st.code("""
 def recommender(user, doc_id):
-    # 1. Estrai parametri
+    # estrai parametri
     eta = config['eta']
     zeta = config['zeta']
     alpha = config['alpha']
     
-    # 2. Calcola leggibilità
+    # calcola leggibilità
     flesch = get_flesch(doc_id)
     
-    # 3. Calcola similarità tematica
+    # calcola similarità tematica
     sim = theme_similarity(user, doc_id)
     
-    # 4. Calcola gap di leggibilità
+    # calcola gap di leggibilità
     gap, target, readability = gap_readability(user, flesch)
     
-    # 5. Applica penalità dinamica
+    # applica penalità dinamica
     penalty_score = penalty(target, readability, alpha)
     gap_penalized = gap * penalty_score
     
-    # 6. Calcola score finale
+    # calcola score finale
     score = eta * sim - zeta * gap_penalized
     
     return score
@@ -187,9 +187,9 @@ def recommender(user, doc_id):
 divider()
 
 # Metriche di Valutazione
-section_title("📊 Metriche di Valutazione")
+section_title(" Metriche di Valutazione")
 
-tabs = st.tabs(["Precision@K", "NDCG", "Coverage"])
+tabs = st.tabs(["Precision@K"])
 
 with tabs[0]:
     st.write("""
@@ -200,100 +200,7 @@ with tabs[0]:
     - Range: [0, 1], maggiore è meglio
     """)
 
-with tabs[1]:
-    st.write("""
-    **NDCG (Normalized Discounted Cumulative Gain)**: Ranking quality
-    
-    - Tiene conto della posizione dei buoni risultati
-    - Penalizza se buoni risultati sono in fondo
-    - Range: [0, 1], maggiore è meglio
-    """)
-
-with tabs[2]:
-    st.write("""
-    **Coverage**: Varietà delle raccomandazioni
-    
-    - Percentuale di catalogo raccomandato
-    - Evita always recommending same items
-    - Range: [0, 1], maggiore è meglio (diversità)
-    """)
-
-divider()
-
-# Visualizzazione Score Distribution
-section_title("📈 Simulazione di Score")
-
-st.write("Simulazione della distribuzione degli score per diversi scenari:")
-
-# Genera dati simulati
-np.random.seed(42)
-n_docs = 200
-
-# Scenario 1: Utente con preferenza chiara
-similarities = np.random.normal(0.5, 0.2, n_docs)
-gaps = np.abs(np.random.normal(10, 15, n_docs))
-
-eta, zeta, alpha = 0.6, 0.4, 0.8
-
-scores = eta * similarities - zeta * gaps * (1 + alpha * (gaps > 5).astype(int))
-
-col1, col2 = st.columns(2)
-
-with col1:
-    fig_scores = px.histogram(
-        x=scores,
-        nbins=40,
-        color_discrete_sequence=['#4ECDC4'],
-        labels={'x': 'Score', 'y': 'Numero di Documenti'},
-        title='Distribuzione degli Score'
-    )
-    st.plotly_chart(fig_scores, )
-
-with col2:
-    # Top 10 Documents
-    top_indices = np.argsort(scores)[-10:][::-1]
-    top_scores = scores[top_indices]
-    
-    fig_top10 = go.Figure()
-    fig_top10.add_trace(go.Bar(
-        y=[f"Doc {i}" for i in range(1, 11)],
-        x=top_scores,
-        marker_color='#FF6B6B',
-        orientation='h'
-    ))
-    fig_top10.update_layout(
-        title="Top 10 Raccomandazioni",
-        xaxis_title="Score",
-        height=400
-    )
-    st.plotly_chart(fig_top10, )
-
-divider()
-
-# Best Practices
-section_title("💡 Best Practices")
-
-col1, col2 = st.columns(2)
-
-with col1:
-    st.markdown("""
-    ### Ottimizzazione
-    - Sintonizzare η e ζ su dati reali
-    - Testare diverse configurazioni di α
-    - Monitorare le metriche nel tempo
-    - Raccogliere feedback utente
-    """)
-
-with col2:
-    st.markdown("""
-    ### Troubleshooting
-    - **Raccomandazioni troppo facili**: ↑ eta o ↓ zeta
-    - **Raccomandazioni troppo difficili**: ↓ alpha
-    - **Poca varietà**: ↓ zeta
-    - **Scarsa rilevanza**: ↑ eta
-    """)
-
 divider()
 
 st.markdown("---")
-st.markdown("**📚 Nota**: I parametri possono essere regolati nel file di configurazione `conf/project.yaml`")
+st.markdown("** Nota**: I parametri possono essere regolati nel file di configurazione `conf/project.yaml`")
