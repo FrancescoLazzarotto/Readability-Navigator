@@ -59,50 +59,34 @@ class RecommenderEvaluation:
 
         return np.mean(self.ndcg_history)
 
-
-# ==========================
-# Esecuzione standalone
-# ==========================
 if __name__ == "__main__":
     import json
     import os
     import pandas as pd
     from utils.data_loader import load_features_df, load_embedding
     config = load_yaml()
-    # =====================================================
-    # Configurazione base
-    # =====================================================
+    
     configuration = {
-        "tol": config['tol'],       # tolleranza readability
-        "eta": config['eta'],      # peso similarità tematica
-        "zeta": config['zeta'],     # peso gap leggibilità
-        "alpha": config['alpha'],    # penalità over-readability
-        "k": config['k']           # Top-K raccomandazioni
+        "tol": config['tol'],
+        "eta": config['eta'],
+        "zeta": config['zeta'],
+        "alpha": config['alpha'],
+        "k": config['k']
     }
 
-    # =====================================================
-    # Caricamento dati reali
-    # =====================================================
     df = load_features_df()
     embedding = load_embedding()  
     rel_profile_path = config['paths']['user_json']
     profile_path = os.path.join(PROJECT_ROOT, rel_profile_path)
     user_ids = [f.replace(".json","") for f in os.listdir(profile_path) if f.endswith(".json")]
-
     
     users = []
     for uid in user_ids:
         with open(os.path.join(profile_path, f"{uid}.json"), "r") as f:
             users.append(json.load(f))
 
-    # =====================================================
-    # Istanzio il recommender
-    # =====================================================
     recommender = RecommenderEngine(df, embedding, configuration, user_id=None, profile_path=profile_path)
 
-    # =====================================================
-    # Valutazione
-    # =====================================================
     evaluator = RecommenderEvaluation(k=configuration['k'])
     final_ndcg = evaluator.evaluate_users(recommender, users)
 
