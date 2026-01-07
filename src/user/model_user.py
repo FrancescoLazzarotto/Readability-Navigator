@@ -151,7 +151,7 @@ def update_topic_vector(user, doc_embedding, difficulty):
     return updated_vector
     
 
-def update_target_readability(old_target, doc_readability, difficulty, learning_rate = 1):
+def update_target_readability(old_target, doc_readability, difficulty, learning_rate = 100):
     """Aggiornamento target readaibiity dell'user model
         -negativo troppo facile positivo troppo difficile 
     
@@ -169,15 +169,29 @@ def update_target_readability(old_target, doc_readability, difficulty, learning_
     if difficulty > 3:
         direction = 1 
     else:
-        direction = - 1
+        direction = -1
      
     alpha = difficulty_to_alpha(difficulty)
      
     distance = abs(doc_readability - old_target)
     
-    shift = direction *  learning_rate * alpha * distance
+    shift = direction * learning_rate * alpha * distance
     
-    new_target = old_target - shift
+    min_shift_map = {
+        1: 2,
+        2: 2,
+        3: 0,
+        4: 3,
+        5: 5
+    }
+    min_shift = min_shift_map.get(difficulty, 0) * direction
+    
+    if direction > 0:
+        shift = max(shift, min_shift)
+    else:
+        shift = min(shift, min_shift)
+    
+    new_target = old_target + shift
     
     return new_target
 
