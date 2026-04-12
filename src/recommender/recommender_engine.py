@@ -68,9 +68,7 @@ class RecommenderEngine():
           
         return df
 
-    
-    
-    
+
     
     def get_document(self, doc_id):
         """Prendere testo ed embedding di un testo dato il suo id

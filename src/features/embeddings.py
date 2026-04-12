@@ -64,7 +64,8 @@ def sentences_embedding(sentences, model):
     
     embedding = model.encode(
         sentences,
-        truncate_dim = 512
+        convert_to_numpy=True
+        #, truncate_dim = ?
                             )
     return embedding
 

@@ -22,6 +22,9 @@ def save_user_json(user, user_id):
         user (dict): dizionario con i dati dell'utente
         user_id (int): identificativo dell'utente
     """
+    if "target_readability" in user:
+        user["target_readability"] = max(20, min(90, float(user["target_readability"])))
+    
     os.makedirs(users_path, exist_ok=True)
     file_name = f"user{user_id}.json"
     path = os.path.join(users_path, file_name)
@@ -151,38 +154,49 @@ def update_topic_vector(user, doc_embedding, difficulty):
     return updated_vector
     
 
-def update_target_readability(old_target, doc_readability, difficulty, learning_rate = 100):
-    """Aggiornamento target readaibiity dell'user model
-        -negativo troppo facile positivo troppo difficile 
+def update_target_readability(old_target, doc_readability, difficulty, learning_rate=2.5, damping=0.6):
+    """Aggiornamento target readability dell'user model con damping per stabilità
     
     Args:
-        old_target(int): target readability dell'user model
-        doc_readability(int): leggibilità del documento
+        old_target(int): target readability dell'user model (deve essere in [20, 90])
+        doc_readability(int): leggibilità del documento (deve essere in [0, 100])
         difficulty(int): difficoltà espressa dall'utente (1-5)
-        learning_rate(float): parametro che controlla la dimensione del passo per la modalità di aggiornamento
+        learning_rate(float): parametro che controlla la dimensione del passo (default 1.0)
+        damping(float): fattore di riduzione dello shift [0, 1] - (default 0.3 = applica solo 30% dello shift)
     
     Returns:
-        int: target readability dell'utente aggiornato
+        int: target readability dell'utente aggiornato (sempre in range [20, 90])
     """
+    
+    old_target = float(old_target)
+    doc_readability = float(doc_readability)
+    
+    if old_target < 20 or old_target > 90:
+        old_target = max(20, min(90, old_target))
+    
+    doc_readability = max(0, min(100, doc_readability))
+    
+    
     if difficulty == 3:
         return old_target
+    
+   
     if difficulty > 3:
-        direction = 1 
+        direction = 1  
     else:
-        direction = -1
+        direction = -1  
      
     alpha = difficulty_to_alpha(difficulty)
-     
     distance = abs(doc_readability - old_target)
-    
     shift = direction * learning_rate * alpha * distance
     
+    
     min_shift_map = {
-        1: 2,
-        2: 2,
-        3: 0,
-        4: 3,
-        5: 5
+        1: 3,  
+        2: 2,  
+        3: 0, 
+        4: 2, 
+        5: 5  
     }
     min_shift = min_shift_map.get(difficulty, 0) * direction
     
@@ -191,12 +205,26 @@ def update_target_readability(old_target, doc_readability, difficulty, learning_
     else:
         shift = min(shift, min_shift)
     
-    new_target = old_target + shift
+    shift_damped = damping * shift
+    
+    if 50 <= old_target <= 70:
+        shift_damped = 0.5 * shift_damped  
+    
+    new_target = old_target + shift_damped
+    new_target = max(20, min(90, new_target))
     
     return new_target
 
 
+
 def update_history(user, doc_id):
+    """Aggiorna il catalogo dell'utente
+    
+    Args: 
+        user(dict): dizionario user model
+        doc_id(int/str): identificativo del documento da aggiungere al catalogo 
+    
+    """
     doc_id = str(doc_id)
     if doc_id not in user["history"]:
         user["history"].append(doc_id)
@@ -227,7 +255,7 @@ def update_user_model(user, doc_id, doc_readability, difficulty):
     new_target = update_target_readability(user['target_readability'], doc_readability, difficulty)
     
     user['topic_vector'] = new_vector.tolist()
-    user['target_readability'] = new_target
+    user['target_readability'] = max(20, min(90, new_target))
     
     save_user_json(user, user["user_id"])
     
