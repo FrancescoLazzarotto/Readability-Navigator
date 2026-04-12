@@ -151,13 +151,7 @@ if user_mode == "Crea Nuovo Utente":
                             except Exception as e:
                                 st.error(f"Errore nell'aggiornamento del profilo: {str(e)}")
 
-                """
-                with st.expander("Visualizza Dettagli Completi"):
-                    for idx, row in df.iterrows():
-                        st.markdown(f"### {row['title']}")
-                        st.write(f"Score: {row['score']:.4f}")
-                        st.write(f"Testo:\n{row['testo']}")
-                        st.divider() """
+            
             else:
                 st.warning("Nessuna raccomandazione disponibile con questi parametri")
                 st.dataframe(df)

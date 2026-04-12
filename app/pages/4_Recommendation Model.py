@@ -32,77 +32,23 @@ divider()
 section_title(" Formula di Scoring")
 
 st.markdown("""
-### Equazione Principale
+### La raccomandazione avviene tramite:
 
 $$\\text{Score} = \\eta \\cdot \\text{Similarity} - \\zeta \\cdot \\text{Penalized Gap}$$
 
 Dove:
 - **η (eta)**: Peso della somiglianza tematica (0-1)
-- **ζ (zeta)**: Peso della penalità di leggibilità (0-1)
+- **z (zeta)**: Peso della penalità di leggibilità (0-1)
 - **Similarity**: Somiglianza coseno tra profilo utente e embedding documento
 - **Penalized Gap**: Gap di leggibilità moltiplicato per fattore di penalità
+
+**Gap di Leggibilità**: Differenza tra target dell'utente e leggibilità del documento. Gap = 0 → documento perfetto.
+
+**Penalità Dinamica**: Se il documento è troppo difficile (> target), la penalità aumenta (1 + α). Se è facile, resta 1. 
 """)
 
 divider()
 
-# Componenti del Modello
-section_title(" Componenti del Modello")
-
-tab1, tab2, tab3 = st.tabs(["Somiglianza Tematica", "Gap di Leggibilità", "Penalità Dinamica"])
-
-with tab1:
-    st.markdown("""
-    ### Cosine Similarity
-    
-    Misura la somiglianza tra due vettori nel spazio embedding:
-    
-    $$\\text{Similarity} = \\frac{\\mathbf{u} \\cdot \\mathbf{v}}{\\|\\mathbf{u}\\| \\|\\mathbf{v}\\|}$$
-    
-    - Intervallo: [-1, 1] (tipicamente [0, 1])
-    - 1 = identici, 0 = ortogonali, -1 = opposti
-    - Misura il grado di sovrapposizione tematica
-    
-    **Vantaggi:**
-    - Insensibile alla magnitudine dei vettori
-    - Efficiente computazionalmente
-    - Ottimo per spazi ad alta dimensionalità
-    """)
-
-with tab2:
-    st.markdown("""
-    ### Readability Gap
-    
-    Misura la differenza tra la leggibilità desiderata e quella effettiva:
-    
-    $$\\text{Gap} = |\\text{target\\_readability} - \\text{document\\_readability}|$$
-    
-    - Gap = 0: Leggibilità perfetta
-    - Gap > 0: Documento non è al livello target
-    
-    **Interpretazione:**
-    - Gap piccolo: Documento adatto al livello utente 
-    - Gap grande: Documento troppo facile o difficile 
-    """)
-
-with tab3:
-    st.markdown("""
-    ### Penalty Function
-    
-    Penalizza i documenti troppo difficili:
-    
-    $$\\text{Penalty} = \\begin{cases} 
-    1 + \\alpha & \\text{se readability} > \\text{target} \\\\
-    1 & \\text{altrimenti}
-    \\end{cases}$$
-    
-    - **α (alpha)**: Fattore di penalità (es. 0.5)
-    - Documenti più difficili ricevono penalità maggiore
-    - Incoraggia raccomandazioni al livello appropriato
-    """)
-
-divider()
-
-# Pipeline del Modello
 section_title(" Pipeline di Ranking")
 
 col1, col2, col3, col4, col5 = st.columns(5)
@@ -122,36 +68,7 @@ with col4:
 with col5:
     st.markdown("**5. Output**\n- Raccomandazioni\n- Score finali\n- Testo completo")
 
-divider()
 
-# Parametri del Modello
-section_title(" Parametri Configurabili")
-
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.markdown("""
-    **η (Eta) - Peso Similarità**
-    - Range: 0.0 - 1.0
-    - Default: 0.6
-    - Effetto: ↑ Enfatizza tematica
-    """)
-
-with col2:
-    st.markdown("""
-    **ζ (Zeta) - Peso Penalità**
-    - Range: 0.0 - 1.0
-    - Default: 0.4
-    - Effetto: ↑ Enfatizza leggibilità
-    """)
-
-with col3:
-    st.markdown("""
-    **α (Alpha) - Fattore Penalità**
-    - Range: 0.0 - 2.0
-    - Default: 0.8
-    - Effetto: ↑ Più severo su difficili
-    """)
 
 divider()
 
@@ -184,23 +101,65 @@ def recommender(user, doc_id):
     return score
 """, language="python")
 
-divider()
-
 # Metriche di Valutazione
 section_title(" Metriche di Valutazione")
 
-tabs = st.tabs(["Precision@K"])
+st.write("""
+Il sistema viene valutato con **NDCG@K** (Normalized Discounted Cumulative Gain),
+una metrica che misura quanto bene il modello raccomanda elementi appropriati.
+""")
 
-with tabs[0]:
+st.markdown("""
+### NDCG@K - Cosa è?
+
+**L'idea**: Se consiglio un documento facile a chi ne legge uno di difficili, ho sbagliato.
+NDCG misura quanto spesso consiglio l'item giusto.
+
+**Formula**:
+- Guardo i Top-5 elementi consigliati
+- Controllo se hanno la leggibilità giusta (vicino al target dell'utente)
+- Do un punteggio da 0 a 1
+- **1.0** = sempre giusto | **0.5** = 50% giusti | **0.0** = sempre sbagliato
+
+**Esempio**:
+- Target utente = 60 (medio)
+- Consiglio Top-5: [60, 62, 58, 75, 55]
+- Sono 4/5 vicini al target → NDCG ≈ 0.80 (80%)
+""")
+
+divider()
+
+st.markdown("### Risultati Attuali")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    st.metric("NDCG Medio", "0.742", "74.2%")
     st.write("""
-    **Precision@K**: Percentuale di raccomandazioni rilevanti nei Top-K
+    Su 2 utenti test:
+    - User 1: NDCG = 0.75
+    - User 2: NDCG = 0.73
     
-    - K=5, K=10, K=20 comuni
-    - Misura: Quante raccomandazioni piacciono all'utente
-    - Range: [0, 1], maggiore è meglio
+    **Interpretazione**: In media, il sistema consiglia 
+    la leggibilità giusta il 74% delle volte.
+    """)
+
+with col2:
+    st.write("""
+    ### Cosa Significa 0.74?
+    
+     - **Buono**: Non è casuale (0.5)
+     - **Affidabile**: La maggior parte è corretta
+     - **Non Perfetto**: C'è margine di miglioramento
+    
+    **Paragone**:
+    - 0.90+ = Eccellente
+    - 0.70-0.85 = Buono 
+    - 0.50-0.70 = Accettabile
+    - <0.50 = Pessimo
     """)
 
 divider()
 
 st.markdown("---")
-st.markdown("** Nota**: I parametri possono essere regolati nel file di configurazione `conf/project.yaml`")
+st.markdown("Nota: I parametri possono essere regolati nel file di configurazione `conf/project.yaml`")
