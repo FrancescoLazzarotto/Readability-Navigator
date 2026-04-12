@@ -1,102 +1,134 @@
-#  Readability-Navigator  
-### Adaptive Text Recommender System for Students with Learning Disabilities
+# Readability Navigator
 
----
+Readability Navigator is a personalized text recommendation project that suggests the next best document based on user interests and reading difficulty.
 
-## Overview
+The system combines:
+- symbolic readability metrics (Flesch Reading Ease)
+- semantic embeddings (SBERT, 384 dimensions)
+- iterative user-profile updates driven by feedback
 
-**Readability-Navigator** is an academic project developed at the **University of Turin** for the courses *“Personalized and secure Web || Artificial Intelligence”*.  
-The goal is to support students with **dyslexia or reading difficulties (DSA)** through a **personalized recommender system** that suggests texts matching both their **interests** and **reading ability**.
+The goal is not to simplify text automatically, but to select the most suitable next text for each user.
 
-Instead of simplifying text, the system **selects the next best document** whose topic and difficulty are optimal for the user's cognitive level.  
-It monitors progress, avoids overload, and adapts automatically to help users improve reading comprehension step by step.
+Recommendations balance:
+- semantic relevance to user interests
+- distance from the user readability target
 
----
+## How It Works
 
-## Objectives
+Pipeline:
+1. Load engineered features and document embeddings.
+2. Load or create a user profile (topic_vector, target_readability, history).
+3. Build a candidate catalog:
+- remove already read documents
+- keep documents within readability tolerance
+4. Compute hybrid score:
 
-- Estimate **text readability** using linguistic metrics (e.g., Flesch, Gulpease).  
-- Build a **user profile** that includes reading level and interests.  
-- Recommend the “right text” balancing:
-  - **Semantic similarity** between text and interests  
-  - **Readability distance** from the user’s current level  
-- Collect **feedback** (time, completion, difficulty) to adjust the next recommendation.  
-- Provide an **accessible interface** (font for dyslexia, high contrast, TTS option).
+$$
+score = \eta \cdot similarity - \zeta \cdot gap_{penalized}
+$$
 
----
+The readability gap is dynamically penalized when a text is above the user target.
 
-##  System Architecture
+5. Rank documents and return Top-K.
+6. Collect difficulty feedback (1-5) and update:
+- reading history
+- topic vector
+- target readability
 
-User → Profile (topic_vector, readability_target)
-→ Retrieve texts by topic similarity
-→ Filter by readability tolerance
-→ Score = η·semantic_similarity − ζ·|readability − target|
-→ Rank and recommend Top-K
-→ Collect feedback (time, completion)
-→ Update user profile (new target + updated interests)
+## Repository Structure
 
+- app/: Streamlit dashboard and presentation pages
+- src/recommender/: ranking and recommendation engine
+- src/user/: user profile creation and update logic
+- src/features/: preprocessing and embeddings
+- src/eval/: offline evaluation (NDCG)
+- utils/: loading and I/O utilities
+- conf/project.yaml: core parameters and paths
+- data/: processed datasets and user JSON profiles
 
-##  Technologies Used
+## Quick Start
 
-| Component | Tool |
-|------------|------|
-| Language | Python 3.10+ |
-| NLP & Readability | `textstat`, `spacy`, `nltk` |
-| Semantic Embeddings | `sentence-transformers` (SBERT) |
-| Similarity & Ranking | `scikit-learn`, cosine similarity |
-| Interface (optional) | `Streamlit` or `Flask` |
-| Evaluation | `numpy`, `pandas`, `matplotlib` |
+Prerequisites:
+- Python 3.10+
+- pip
 
----
-├
+Install dependencies:
 
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
 
-##  Datasets
+Download required NLTK resource:
 
-| Dataset | Description | Source |
-|----------|--------------|--------|
-| **Simple English Wikipedia** | Simplified articles | [simple.wikipedia.org](https://simple.wikipedia.org) |
-| **Standard Wikipedia** | Reference full-text articles | [wikipedia.org](https://wikipedia.org) |
-| **ASSET** | Sentence-level simplifications | [HuggingFace](https://huggingface.co/datasets/asset) |
-| **OneStopEnglish** | Texts at multiple difficulty levels | [GitHub](https://github.com/nishkalavallabhi/OneStopEnglishCorpus) |
+```bash
+python -c "import nltk; nltk.download('punkt')"
+```
 
----
+Run the Streamlit app from project root:
 
-##  How It Works
+```bash
+streamlit run app/App.py
+```
 
-1. **Data preprocessing**  
-   Clean and tokenize texts, remove markup, and calculate readability scores.
+## Developer Testing Setup
 
-2. **Feature extraction**  
-   Compute text readability (e.g., Flesch) and semantic embeddings (SBERT).
+The requirements file includes both runtime and testing dependencies.
 
-3. **User modeling**  
-   - Collect user interests and reading test.  
-   - Estimate initial readability target.  
-   - Store as `user_profile.json` with embedding and target.
+Recommended validation workflow:
+1. Smoke check on processed data:
 
-4. **Recommendation**  
-   Retrieve top-N texts by semantic similarity,  
-   filter those near the target difficulty,  
-   and compute:
-   \[
-   score(u,d) = η·sim_{topic}(u,d) − ζ·|readability(d) − target_u|
-   \]
-   Then recommend the Top-K.
+```bash
+python src/test/test.py
+```
 
-5. **Feedback loop**  
-   Measure reading time, completion, or skips.  
-   Adjust target difficulty:
-   - +Δ if easy  
-   - −Δ if difficult or abandoned.  
-   Update interests over time.
+2. Offline recommender evaluation:
 
-6. **Evaluation**  
-   Assess with metrics: NDCG@k, Target-Deviation@k, and Completion Rate.
+```bash
+python src/eval/evaluation.py
+```
 
+3. Run unit/integration test suite (when tests are added/extended):
 
+```bash
+pytest -q
+```
 
-## Authors
+## Run From Python
+
+Minimal example using main.py:
+
+```python
+from main import main
+
+user = {
+    "user_id": 1,
+    "target_readability": 60,
+    "topic_vector": [0.0] * 384,
+    "history": []
+}
+
+ranked_df = main(user)
+print(ranked_df.head())
+```
+
+## Data Assets
+
+Primary dataset used in this repository: OneStopEnglish (processed version).
+
+Expected local assets:
+- data/interim/onestop_texts.csv
+- data/processed/onestop_nltk_features.csv
+- src/features/doc_embedding.pickle
+
+## Configuration Notes
+
+- Main model parameters are in conf/project.yaml.
+- User profiles are saved in data/user/json_file/.
+- Some scripts in src/ingest and src/features are intended for experimentation in addition to app runtime.
+
+## Author
+
 Francesco Lazzarotto
 
 
