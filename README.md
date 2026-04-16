@@ -24,10 +24,20 @@ Pipeline:
 4. Compute hybrid score:
 
 $$
-score = \eta \cdot similarity - \zeta \cdot gap_{penalized}
+S(u,d) = \eta \cdot \cos(v_u, e_d) - \zeta \cdot \tilde{G}(u,d) \cdot P(u,d)
 $$
 
-The readability gap is dynamically penalized when a text is above the user target.
+where:
+
+$$
+\widetilde{G}(u,d)=\min\left(\frac{|\tau_u-r_d|}{tol},1\right),\quad
+P(u,d)=\begin{cases}
+1+\alpha & r_d < \tau_u \\
+1 & r_d \ge \tau_u
+\end{cases}
+$$
+
+In Flesch Reading Ease, lower scores mean harder texts, so the asymmetric penalty is applied when a candidate is harder than the user target.
 
 5. Rank documents and return Top-K.
 6. Collect difficulty feedback (1-5) and update:
@@ -68,7 +78,13 @@ python -c "import nltk; nltk.download('punkt')"
 Run the Streamlit app from project root:
 
 ```bash
-streamlit run app/App.py
+streamlit run streamlit_app.py
+```
+
+Run the CLI checkpoint from project root:
+
+```bash
+python main.py --user-id 1
 ```
 
 ## Developer Testing Setup
@@ -86,6 +102,12 @@ python src/test/test.py
 
 ```bash
 python src/eval/evaluation.py
+```
+
+Optional paper-style simulated protocol (stratified seeds):
+
+```bash
+$env:RUN_SIMULATED_PROTOCOL=1; python src/eval/evaluation.py
 ```
 
 3. Run unit/integration test suite (when tests are added/extended):
